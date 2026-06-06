@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  body {
+    @apply bg-brand-light text-brand-dark antialiased overflow-x-hidden transition-colors duration-300 dark:bg-emerald-950 dark:text-slate-100;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+/* Custom premium design utilities */
+@layer components {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    @apply transition-colors duration-300 dark:bg-emerald-900/20 dark:border-emerald-800/30;
+  }
+
+  .glass-card-dark {
+    background: rgba(4, 47, 26, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    @apply transition-colors duration-300 dark:bg-emerald-950/80 dark:border-emerald-900/30;
+  }
+
+  .btn-primary {
+    @apply bg-brand-accent hover:bg-brand-accentHover text-brand-dark font-extrabold py-3 px-6 rounded-full transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg hover:shadow-yellow-500/20 active:translate-y-0 flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-brand-dark hover:bg-brand-dark hover:text-white text-brand-dark font-semibold py-3 px-6 rounded-full transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center gap-2 dark:border-brand-accent dark:hover:bg-brand-accent dark:hover:text-brand-dark dark:text-brand-accent;
+  }
+
+  .btn-outline-white {
+    @apply border-2 border-white hover:bg-white hover:text-brand-dark text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 dark:border-brand-accent dark:hover:bg-brand-accent dark:hover:text-brand-dark dark:text-brand-accent;
+  }
+
+  .section-padding {
+    @apply py-20 px-4 md:px-8 max-w-7xl mx-auto;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-dark via-emerald-800 to-brand-accent dark:from-white dark:via-emerald-400 dark:to-brand-accent;
+  }
+}
+
+/* Custom horizontal scrollbar for lists */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hide standard video interface controls if needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

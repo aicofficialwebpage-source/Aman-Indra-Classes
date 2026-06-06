@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Local Environment Configs
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+server/.env
+client/.env
+
+# Build outputs
+dist/
+client/dist/
+build/
+
+# Uploads and temporary directories
+server/uploads/*
+!server/uploads/.gitkeep
+uploads/
+.DS_Store
+Thumbs.db
+*.log
+.ai_completion/
+.antigravity/
+.system_generated/
