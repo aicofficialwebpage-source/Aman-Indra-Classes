@@ -4,10 +4,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const useSMTP = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const useEmailJS = !!(
+  process.env.EMAILJS_SERVICE_ID &&
+  process.env.EMAILJS_TEMPLATE_ID &&
+  process.env.EMAILJS_PUBLIC_KEY &&
+  process.env.EMAILJS_PRIVATE_KEY
+);
 
 let transporter = null;
 
-if (useSMTP) {
+if (useEmailJS) {
+  console.log('Email System: Configured EmailJS REST API transport.');
+} else if (useSMTP) {
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -19,12 +27,44 @@ if (useSMTP) {
   });
   console.log(`Email System: Configured SMTP at ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}`);
 } else {
-  console.log('Email System: SMTP credentials missing. Running in development MOCK mode (emails logged to console).');
+  console.log('Email System: SMTP/EmailJS credentials missing. Running in development MOCK mode (emails logged to console).');
 }
 
 export const sendEmail = async ({ to, subject, html, text }) => {
   const from = process.env.EMAIL_FROM || 'admissions@amanindraclasses.com';
-  if (useSMTP && transporter) {
+  
+  if (useEmailJS) {
+    try {
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: process.env.EMAILJS_SERVICE_ID,
+          template_id: process.env.EMAILJS_TEMPLATE_ID,
+          user_id: process.env.EMAILJS_PUBLIC_KEY,
+          accessToken: process.env.EMAILJS_PRIVATE_KEY,
+          template_params: {
+            to_email: to,
+            subject: subject,
+            message_html: html || text,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`EmailJS Response: ${response.status} - ${errorText}`);
+      }
+
+      console.log(`Email Sent: via EmailJS REST API to ${to}`);
+      return { emailJSSent: true };
+    } catch (error) {
+      console.error(`EmailJS Error: Failed to send email to ${to}:`, error);
+      throw error;
+    }
+  } else if (useSMTP && transporter) {
     try {
       const info = await transporter.sendMail({
         from,
