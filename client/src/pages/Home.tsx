@@ -211,7 +211,7 @@ export const Home: React.FC = () => {
           <div className="lg:col-span-5 relative w-full flex justify-center">
             <div className="relative w-full max-w-[360px] aspect-[4/5] bg-white dark:bg-emerald-900/35 border border-slate-100 dark:border-emerald-900/30 rounded-[32px] p-4 shadow-2xl shadow-slate-200/60 dark:shadow-none rotate-2 hover:rotate-0 transition-transform duration-500 overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600"
+                src={getImageUrl(settings.heroImageUrl, "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600")}
                 alt="Coaching study environment"
                 className="w-full h-full object-cover rounded-2xl"
               />

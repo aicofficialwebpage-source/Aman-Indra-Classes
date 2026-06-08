@@ -2,6 +2,7 @@ import express from 'express';
 import Setting from '../models/Setting.js';
 import Notification from '../models/Notification.js';
 import auth from '../middleware/auth.js';
+import { upload, useCloudinary } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -61,6 +62,19 @@ router.put('/', auth, async (req, res) => {
     res.json({ message: 'Settings updated successfully.', settings: freshSettingsMap });
   } catch (error) {
     res.status(500).json({ message: 'Error updating settings.', error: error.message });
+  }
+});
+
+// POST /api/settings/upload - Upload settings-related image (Protected)
+router.post('/upload', auth, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file uploaded.' });
+    }
+    const url = useCloudinary ? req.file.path : `/uploads/${req.file.filename}`;
+    res.json({ url });
+  } catch (error) {
+    res.status(500).json({ message: 'Error uploading image.', error: error.message });
   }
 });
 

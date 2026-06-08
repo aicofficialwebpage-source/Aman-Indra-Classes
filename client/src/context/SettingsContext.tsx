@@ -16,6 +16,7 @@ interface Settings {
   seoMetaDescription?: string;
   seoKeywords?: string;
   whatsappNumber?: string;
+  heroImageUrl?: string;
 }
 
 interface SettingsContextType {
@@ -41,7 +42,8 @@ const defaultSettings: Settings = {
   seoMetaTitle: 'Aman Indra Classes (AIC) - Best Coaching in Govind Nagar, Kanpur',
   seoMetaDescription: "Aman Indra Classes (AIC) is Kanpur's premier institute for Class 6th-12th CBSE/ICSE boards, IIT-JEE, and NEET prep. Join Kanpur's toppers today!",
   seoKeywords: 'Best Coaching Institute in Kanpur, IIT JEE Coaching in Kanpur, NEET Coaching in Kanpur, Class 9th 10th Coaching Kanpur, Class 11th 12th Coaching Kanpur, Foundation Coaching Kanpur',
-  whatsappNumber: '919936174852'
+  whatsappNumber: '919936174852',
+  heroImageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600'
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

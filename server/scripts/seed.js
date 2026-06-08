@@ -38,6 +38,7 @@ const seedData = async () => {
     const defaultSettings = [
       { key: 'heroHeadline', value: 'Transform Potential Into Results' },
       { key: 'heroSubheadline', value: "Kanpur's Trusted Coaching Institute for Classes 6–12, IIT-JEE & NEET Preparation Since 2014." },
+      { key: 'heroImageUrl', value: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600' },
       { key: 'contactPhone', value: '+91 99361 74852' }, // Authentic Kanpur contact
       { key: 'contactEmail', value: 'admissions@amanindraclasses.com' },
       { key: 'contactAddress', value: '123/456, Block C, Govind Nagar, Kanpur, Uttar Pradesh - 208006' },

@@ -10,6 +10,7 @@ export const SettingsManager: React.FC = () => {
   const [form, setForm] = useState({
     heroHeadline: '',
     heroSubheadline: '',
+    heroImageUrl: '',
     contactPhone: '',
     contactEmail: '',
     contactAddress: '',
@@ -27,12 +28,14 @@ export const SettingsManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (settings) {
       setForm({
         heroHeadline: settings.heroHeadline || '',
         heroSubheadline: settings.heroSubheadline || '',
+        heroImageUrl: settings.heroImageUrl || '',
         contactPhone: settings.contactPhone || '',
         contactEmail: settings.contactEmail || '',
         contactAddress: settings.contactAddress || '',
@@ -56,6 +59,28 @@ export const SettingsManager: React.FC = () => {
     });
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      setUploadingImage(true);
+      try {
+        const data = await api.post('/settings/upload', formData, true);
+        setForm(prev => ({
+          ...prev,
+          heroImageUrl: data.url
+        }));
+        addToast('Image Uploaded', 'New hero section image uploaded successfully.', 'success');
+      } catch (err: any) {
+        addToast('Upload Failed', err.message || 'Could not upload image.', 'error');
+      } finally {
+        setUploadingImage(false);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -74,6 +99,13 @@ export const SettingsManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getImageUrl = (photoUrl?: string) => {
+    if (!photoUrl) return '';
+    if (photoUrl.startsWith('http')) return photoUrl;
+    const serverOrigin = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+    return `${serverOrigin}${photoUrl}`;
   };
 
   return (
@@ -127,6 +159,46 @@ export const SettingsManager: React.FC = () => {
               placeholder="Kanpur's Trusted Coaching Institute..."
               className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl resize-none focus:border-brand-accent text-xs bg-white leading-relaxed"
             />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-slate-600">Hero Section Banner Image</label>
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {form.heroImageUrl && (
+                <div className="w-20 h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-50">
+                  <img src={getImageUrl(form.heroImageUrl)} alt="Hero preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex-1 flex flex-col gap-2 w-full">
+                <input
+                  type="text"
+                  name="heroImageUrl"
+                  value={form.heroImageUrl}
+                  onChange={handleChange}
+                  placeholder="Paste banner image URL here..."
+                  className="w-full border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs bg-white"
+                />
+                <div className="flex items-center gap-2">
+                  <label className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-1.5 px-3 rounded-lg border border-slate-200 text-[10px] cursor-pointer flex items-center gap-1.5">
+                    {uploadingImage ? (
+                      <>
+                        <Loader2 size={12} className="animate-spin" />
+                        Uploading Image...
+                      </>
+                    ) : (
+                      'Upload Local Image'
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-[10px] text-slate-400">Recommended: Landscape orientation (JPG, PNG, WEBP)</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
