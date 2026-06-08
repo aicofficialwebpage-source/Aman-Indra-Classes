@@ -11,6 +11,11 @@ export const SettingsManager: React.FC = () => {
     heroHeadline: '',
     heroSubheadline: '',
     heroImageUrl: '',
+    heroTagline: '',
+    heroShowTopper: 'true',
+    heroTopperScore: '',
+    heroTopperName: '',
+    heroTopperText: '',
     contactPhone: '',
     contactEmail: '',
     contactAddress: '',
@@ -36,6 +41,11 @@ export const SettingsManager: React.FC = () => {
         heroHeadline: settings.heroHeadline || '',
         heroSubheadline: settings.heroSubheadline || '',
         heroImageUrl: settings.heroImageUrl || '',
+        heroTagline: settings.heroTagline || '',
+        heroShowTopper: settings.heroShowTopper || 'true',
+        heroTopperScore: settings.heroTopperScore || '',
+        heroTopperName: settings.heroTopperName || '',
+        heroTopperText: settings.heroTopperText || '',
         contactPhone: settings.contactPhone || '',
         contactEmail: settings.contactEmail || '',
         contactAddress: settings.contactAddress || '',
@@ -52,7 +62,7 @@ export const SettingsManager: React.FC = () => {
     }
   }, [settings]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value
@@ -149,6 +159,18 @@ export const SettingsManager: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-slate-600" htmlFor="setHeroTag">Hero Tagline Badge Text *</label>
+            <input
+              id="setHeroTag"
+              type="text"
+              name="heroTagline"
+              value={form.heroTagline}
+              onChange={handleChange}
+              placeholder="e.g. ★ Kanpur's Premier Coaching Institute"
+              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs bg-white"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
             <label className="font-bold text-slate-600" htmlFor="setHeroSub">Hero Subheading description *</label>
             <textarea
               id="setHeroSub"
@@ -197,6 +219,66 @@ export const SettingsManager: React.FC = () => {
                   </label>
                   <span className="text-[10px] text-slate-400">Recommended: Landscape orientation (JPG, PNG, WEBP)</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Topper overlay widget config panel */}
+          <div className="flex flex-col gap-2 border border-slate-100 bg-slate-50/50 p-4 rounded-xl mt-2 text-xs">
+            <h5 className="font-bold text-slate-700 text-xs">Hero Image Topper Card Overlay</h5>
+            <div className="flex items-center gap-3 mb-2">
+              <label className="font-bold text-slate-600" htmlFor="setShowTopper">Show Topper Card Widget Overlay</label>
+              <select
+                id="setShowTopper"
+                name="heroShowTopper"
+                value={form.heroShowTopper}
+                onChange={handleChange}
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-1.5 px-3 rounded-xl focus:border-brand-accent text-[11px] bg-white cursor-pointer"
+              >
+                <option value="true">Show Overlay</option>
+                <option value="false">Hide Overlay</option>
+              </select>
+            </div>
+            
+            <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 transition-opacity duration-300 ${form.heroShowTopper === 'false' ? 'opacity-40 pointer-events-none' : ''}`}>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-bold text-slate-600" htmlFor="setTopperScore">Topper Score / Percentage</label>
+                <input
+                  id="setTopperScore"
+                  type="text"
+                  name="heroTopperScore"
+                  value={form.heroTopperScore}
+                  onChange={handleChange}
+                  disabled={form.heroShowTopper === 'false'}
+                  placeholder="e.g. 99.2%"
+                  className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs bg-white"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-bold text-slate-600" htmlFor="setTopperName">Topper Name</label>
+                <input
+                  id="setTopperName"
+                  type="text"
+                  name="heroTopperName"
+                  value={form.heroTopperName}
+                  onChange={handleChange}
+                  disabled={form.heroShowTopper === 'false'}
+                  placeholder="e.g. Shraddha Chaturvedi"
+                  className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs bg-white"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-bold text-slate-600" htmlFor="setTopperText">Topper Description/School</label>
+                <input
+                  id="setTopperText"
+                  type="text"
+                  name="heroTopperText"
+                  value={form.heroTopperText}
+                  onChange={handleChange}
+                  disabled={form.heroShowTopper === 'false'}
+                  placeholder="e.g. Swarup Public School Topper"
+                  className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs bg-white"
+                />
               </div>
             </div>
           </div>

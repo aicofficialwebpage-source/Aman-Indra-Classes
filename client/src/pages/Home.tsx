@@ -142,7 +142,7 @@ export const Home: React.FC = () => {
             {/* Tagline */}
             <div className="flex items-center justify-center lg:justify-start gap-2">
               <span className="bg-brand-accent/15 border border-brand-accent/30 text-brand-accent dark:text-brand-accent text-[10px] md:text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full">
-                ★ Kanpur's Premier Coaching Institute
+                {settings.heroTagline || "★ Kanpur's Premier Coaching Institute"}
               </span>
             </div>
 
@@ -217,15 +217,21 @@ export const Home: React.FC = () => {
               />
               
               {/* Topper overlay widget banner */}
-              <div className="absolute bottom-8 left-8 right-8 glass-card border border-white/40 dark:border-emerald-800/30 p-4 rounded-2xl shadow-lg flex items-center gap-3">
-                <div className="w-10 h-10 bg-brand-accent text-brand-dark font-extrabold text-xs rounded-full flex items-center justify-center">
-                  99.2%
+              {settings.heroShowTopper !== 'false' && (
+                <div className="absolute bottom-8 left-8 right-8 glass-card border border-white/40 dark:border-emerald-800/30 p-4 rounded-2xl shadow-lg flex items-center gap-3">
+                  <div className="w-10 h-10 bg-brand-accent text-brand-dark font-extrabold text-xs rounded-full flex items-center justify-center">
+                    {settings.heroTopperScore || '99.2%'}
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-800 dark:text-white text-xs block">
+                      {settings.heroTopperName || 'Shraddha Chaturvedi'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-300">
+                      {settings.heroTopperText || 'Swarup Public School Topper'}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-bold text-slate-800 dark:text-white text-xs block">Shraddha Chaturvedi</span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-300">Swarup Public School Topper</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
