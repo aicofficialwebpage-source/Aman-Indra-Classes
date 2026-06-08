@@ -122,6 +122,45 @@ router.post('/verify-2fa', async (req, res) => {
   }
 });
 
+// POST /api/auth/resend-2fa
+router.post('/resend-2fa', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Please provide email address.' });
+  }
+
+  // Strictly restrict 2FA resend to the configured ADMIN_EMAIL
+  const allowedAdminEmail = (process.env.ADMIN_EMAIL || 'aicofficialwebpage@gmail.com').toLowerCase();
+  if (email.trim().toLowerCase() !== allowedAdminEmail) {
+    // Return generic success to prevent email verification probing/enumeration
+    return res.json({ message: 'A new verification code has been sent.' });
+  }
+
+  try {
+    const admin = await Admin.findOne({ email: allowedAdminEmail });
+    if (!admin) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    admin.twoFactorOtp = otp;
+    admin.twoFactorOtpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiry
+    await admin.save();
+
+    try {
+      await sendTwoFactorAuthEmail(admin.email, otp);
+    } catch (emailErr) {
+      console.error('Failed to send 2FA email:', emailErr);
+      return res.status(500).json({ message: 'Failed to send verification email. Please try again later.' });
+    }
+
+    res.json({ message: 'A new verification code has been sent.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Resend 2FA error.', error: error.message });
+  }
+});
+
 // POST /api/auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;

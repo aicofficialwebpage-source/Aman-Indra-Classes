@@ -18,6 +18,9 @@ export const Login: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
+  // Resend Timer Countdown State
+  const [resendTimer, setResendTimer] = useState(0);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -46,6 +49,19 @@ export const Login: React.FC = () => {
     };
   }, []);
 
+  // Handle countdown interval for resending codes
+  useEffect(() => {
+    let interval: any;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [resendTimer]);
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -63,6 +79,7 @@ export const Login: React.FC = () => {
       
       if (data.require2FA) {
         setViewMode('mfa');
+        setResendTimer(60); // Start 1 minute countdown
         setMessage('A 6-digit verification code (OTP) has been sent to your admin email address.');
       } else {
         login(data.token, data.admin);
@@ -98,6 +115,24 @@ export const Login: React.FC = () => {
     }
   };
 
+  const handleResend2FA = async () => {
+    if (loading || resendTimer > 0) return;
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      await api.post('/auth/resend-2fa', { email });
+      setResendTimer(60); // Restart 1 minute countdown
+      setMessage('A new verification code (OTP) has been sent to your admin email.');
+      setOtpCode('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend verification code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -113,9 +148,28 @@ export const Login: React.FC = () => {
     try {
       await api.post('/auth/forgot-password', { email });
       setViewMode('reset');
+      setResendTimer(60); // Start 1 minute countdown
       setMessage('A password reset verification code has been sent to your admin email.');
     } catch (err: any) {
       setError(err.message || 'Failed to request reset code. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendResetOTP = async () => {
+    if (loading || resendTimer > 0) return;
+    setLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      await api.post('/auth/forgot-password', { email });
+      setResendTimer(60); // Restart 1 minute countdown
+      setMessage('A new password reset code has been sent to your admin email.');
+      setOtpCode('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -151,6 +205,7 @@ export const Login: React.FC = () => {
       setOtpCode('');
       setNewPassword('');
       setConfirmPassword('');
+      setResendTimer(0);
     } catch (err: any) {
       setError(err.message || 'Failed to reset password. Please check if the OTP is correct and try again.');
     } finally {
@@ -301,7 +356,15 @@ export const Login: React.FC = () => {
               )}
             </button>
 
-            <div className="text-center mt-2">
+            <div className="text-center mt-2 flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={resendTimer > 0 || loading}
+                onClick={handleResend2FA}
+                className="text-xs font-semibold text-brand-accent hover:underline disabled:text-slate-400 disabled:no-underline cursor-pointer disabled:cursor-not-allowed"
+              >
+                {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend verification code'}
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -309,6 +372,7 @@ export const Login: React.FC = () => {
                   setMessage('');
                   setViewMode('login');
                   setOtpCode('');
+                  setResendTimer(0);
                 }}
                 className="text-xs text-slate-500 hover:text-brand-dark flex items-center justify-center gap-1 mx-auto font-semibold cursor-pointer"
               >
@@ -436,15 +500,11 @@ export const Login: React.FC = () => {
             <div className="text-center mt-2 flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setError('');
-                  setMessage('');
-                  setViewMode('forgot');
-                  setOtpCode('');
-                }}
-                className="text-xs text-brand-accent hover:underline font-semibold cursor-pointer"
+                disabled={resendTimer > 0 || loading}
+                onClick={handleResendResetOTP}
+                className="text-xs font-semibold text-brand-accent hover:underline disabled:text-slate-400 disabled:no-underline cursor-pointer disabled:cursor-not-allowed"
               >
-                Resend verification code
+                {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend verification code'}
               </button>
               <button
                 type="button"
@@ -455,6 +515,7 @@ export const Login: React.FC = () => {
                   setOtpCode('');
                   setNewPassword('');
                   setConfirmPassword('');
+                  setResendTimer(0);
                 }}
                 className="text-xs text-slate-500 hover:text-brand-dark flex items-center justify-center gap-1 mx-auto font-semibold cursor-pointer"
               >
