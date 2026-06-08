@@ -35,19 +35,7 @@ export const Login: React.FC = () => {
     }
   }, [admin, navigate]);
 
-  // Force light mode theme inside login page
-  useEffect(() => {
-    const root = window.document.documentElement;
-    const hadDark = root.classList.contains('dark');
-    if (hadDark) {
-      root.classList.remove('dark');
-    }
-    return () => {
-      if (hadDark) {
-        root.classList.add('dark');
-      }
-    };
-  }, []);
+
 
   // Handle countdown interval for resending codes
   useEffect(() => {
@@ -267,7 +255,7 @@ export const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
-                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all"
+                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all text-slate-900 bg-white"
               />
             </div>
 
@@ -294,7 +282,7 @@ export const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 pr-11 rounded-xl w-full transition-all"
+                  className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 pr-11 rounded-xl w-full transition-all text-slate-900 bg-white"
                 />
                 <button
                   type="button"
@@ -337,7 +325,7 @@ export const Login: React.FC = () => {
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                 disabled={loading}
-                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl text-center font-bold tracking-widest text-lg transition-all"
+                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl text-center font-bold tracking-widest text-lg transition-all text-slate-900 bg-white"
               />
             </div>
 
@@ -394,7 +382,7 @@ export const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
-                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all"
+                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all text-slate-900 bg-white"
               />
             </div>
 
@@ -442,7 +430,7 @@ export const Login: React.FC = () => {
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                 disabled={loading}
-                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl text-center font-bold tracking-widest text-lg transition-all"
+                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl text-center font-bold tracking-widest text-lg transition-all text-slate-900 bg-white"
               />
             </div>
 
@@ -456,7 +444,7 @@ export const Login: React.FC = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={loading}
-                  className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 pr-11 rounded-xl w-full transition-all"
+                  className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 pr-11 rounded-xl w-full transition-all text-slate-900 bg-white"
                 />
                 <button
                   type="button"
@@ -478,7 +466,7 @@ export const Login: React.FC = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
-                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl w-full transition-all"
+                className="border border-slate-200 focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl w-full transition-all text-slate-900 bg-white"
               />
             </div>
 

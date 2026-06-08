@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 
 // Components
@@ -37,7 +37,24 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
+  const { theme } = useTheme();
   const isAdminPath = location.pathname.startsWith('/admin');
+
+  // Synchronize HTML dark mode class based on active theme and route
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    const isThemeDisabled = location.pathname.startsWith('/admin') || location.pathname === '/login';
+
+    if (isThemeDisabled) {
+      root.classList.remove('dark');
+    } else {
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, [theme, location.pathname]);
 
   return (
     <div className="flex flex-col min-h-screen">

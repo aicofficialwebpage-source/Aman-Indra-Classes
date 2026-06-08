@@ -83,19 +83,7 @@ export const AdminDashboard: React.FC = () => {
     loadStats();
   }, [activeTab]);
 
-  useEffect(() => {
-    // Force light mode theme inside admin panel dashboard
-    const root = window.document.documentElement;
-    const hadDark = root.classList.contains('dark');
-    if (hadDark) {
-      root.classList.remove('dark');
-    }
-    return () => {
-      if (hadDark) {
-        root.classList.add('dark');
-      }
-    };
-  }, []);
+
 
   const handleLogoutClick = () => {
     logout();
