@@ -24,12 +24,33 @@ import Faculty from './models/Faculty.js';
 import Testimonial from './models/Testimonial.js';
 import Blog from './models/Blog.js';
 import Gallery from './models/Gallery.js';
+import Admin from './models/Admin.js';
 import auth from './middleware/auth.js';
 
 dotenv.config();
 
-// Connect to Database
-connectDB();
+// Connect to Database & Auto-Seed Default Admin
+connectDB().then(async () => {
+  try {
+    const adminCount = await Admin.countDocuments({});
+    if (adminCount === 0) {
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@amanindraclasses.com';
+      const adminPassword = process.env.ADMIN_PASSWORD || 'AdminAIC2014!';
+      
+      console.log(`Auto-Seed: Database is empty. Seeding default admin user: ${adminEmail}`);
+      const defaultAdmin = new Admin({
+        email: adminEmail,
+        password: adminPassword
+      });
+      await defaultAdmin.save();
+      console.log('Auto-Seed: Admin account created.');
+    } else {
+      console.log('Auto-Seed: Admin accounts found in database. Skipping seed.');
+    }
+  } catch (err) {
+    console.error('Auto-Seed Error: Failed to check/create default admin:', err);
+  }
+});
 
 const app = express();
 
