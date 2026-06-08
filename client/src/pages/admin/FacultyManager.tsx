@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Users, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, Users, Upload, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface Faculty {
   _id: string;
@@ -16,7 +17,10 @@ interface Faculty {
 
 export const FacultyManager: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [faculty, setFaculty] = useState<Faculty[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<'list' | 'add' | 'edit'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -92,6 +96,8 @@ export const FacultyManager: React.FC = () => {
       formData.append('photo', photoFile);
     }
 
+    setIsSaving(true);
+    showLoader(formMode === 'add' ? 'Adding teacher profile...' : 'Saving teacher changes...');
     try {
       if (formMode === 'add') {
         await api.post('/faculty', formData, true);
@@ -104,17 +110,25 @@ export const FacultyManager: React.FC = () => {
       fetchFaculty();
     } catch (err: any) {
       addToast('Error saving faculty', err.message || 'Failed to save faculty profile.', 'error');
+    } finally {
+      setIsSaving(false);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this faculty profile?')) return;
+    setDeletingId(id);
+    showLoader('Deleting teacher profile...');
     try {
       await api.delete(`/faculty/${id}`);
       addToast('Teacher Profile Deleted', 'Successfully deleted faculty profile.', 'success');
       fetchFaculty();
     } catch (err: any) {
       addToast('Delete Failed', err.message || 'Failed to delete faculty.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -180,8 +194,12 @@ export const FacultyManager: React.FC = () => {
                   <button onClick={() => handleOpenEdit(f)} className="p-2 border rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer">
                     <Edit2 size={13} />
                   </button>
-                  <button onClick={() => handleDelete(f._id)} className="p-2 border border-red-100 text-red-500 hover:bg-red-50 cursor-pointer">
-                    <Trash2 size={13} />
+                  <button
+                    onClick={() => handleDelete(f._id)}
+                    disabled={deletingId !== null}
+                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 cursor-pointer disabled:opacity-50"
+                  >
+                    {deletingId === f._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </div>
               </div>
@@ -283,10 +301,20 @@ export const FacultyManager: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 border-t pt-5 mt-3">
-            <button type="submit" className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer flex items-center gap-2 disabled:opacity-50"
+            >
+              {isSaving && <Loader2 size={14} className="animate-spin" />}
               Save Faculty Member
             </button>
-            <button type="button" onClick={() => setFormMode('list')} className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer">
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={() => setFormMode('list')}
+              className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer disabled:opacity-50"
+            >
               Cancel
             </button>
           </div>

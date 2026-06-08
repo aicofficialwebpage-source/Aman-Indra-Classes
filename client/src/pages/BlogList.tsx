@@ -47,7 +47,7 @@ export const BlogList: React.FC = () => {
         
         {/* Page Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
             Academic Insights
           </span>
           <h1 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Image as ImageIcon, Upload, Trash2, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface GalleryItem {
   _id: string;
@@ -11,7 +12,9 @@ interface GalleryItem {
 
 export const GalleryManager: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [items, setItems] = useState<GalleryItem[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<'Classroom' | 'Events' | 'Results' | 'Faculty' | 'Activities'>('Classroom');
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -50,6 +53,7 @@ export const GalleryManager: React.FC = () => {
     }
 
     setUploading(true);
+    showLoader('Uploading media files to gallery...');
     const count = selectedFiles.length;
     const formData = new FormData();
     formData.append('category', category);
@@ -71,17 +75,23 @@ export const GalleryManager: React.FC = () => {
       addToast('Upload Failed', err.message || 'Failed to upload images.', 'error');
     } finally {
       setUploading(false);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this gallery image?')) return;
+    setDeletingId(id);
+    showLoader('Deleting gallery image...');
     try {
       await api.delete(`/gallery/${id}`);
       addToast('Gallery Item Deleted', 'Image deleted from gallery.', 'success');
       fetchGallery();
     } catch (err) {
       addToast('Delete Failed', 'Failed to delete image.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -187,10 +197,11 @@ export const GalleryManager: React.FC = () => {
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="bg-red-600 hover:bg-red-755 text-white p-2 rounded-full shadow-lg transform translate-y-1.5 group-hover:translate-y-0 transition-transform cursor-pointer"
+                      disabled={deletingId !== null}
+                      className="bg-red-600 hover:bg-red-755 text-white p-2 rounded-full shadow-lg transform translate-y-1.5 group-hover:translate-y-0 transition-transform cursor-pointer disabled:opacity-50"
                       title="Delete Image"
                     >
-                      <Trash2 size={14} />
+                      {deletingId === item._id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                     </button>
                   </div>
                 </div>

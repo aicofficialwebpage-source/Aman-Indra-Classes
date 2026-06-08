@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, ShieldCheck, AlertCircle, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import api from '../utils/api';
+import { useLoading } from '../context/LoadingContext';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -27,6 +28,7 @@ export const Login: React.FC = () => {
   
   const { admin, login } = useAuth();
   const navigate = useNavigate();
+  const { showLoader, hideLoader } = useLoading();
 
   // If already logged in, redirect directly to dashboard
   useEffect(() => {
@@ -61,6 +63,7 @@ export const Login: React.FC = () => {
     }
 
     setLoading(true);
+    showLoader('Authenticating admin credentials...');
 
     try {
       const data = await api.post('/auth/login', { email, password });
@@ -77,6 +80,7 @@ export const Login: React.FC = () => {
       setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
@@ -91,6 +95,7 @@ export const Login: React.FC = () => {
     }
 
     setLoading(true);
+    showLoader('Verifying 2-Step verification code...');
 
     try {
       const data = await api.post('/auth/verify-2fa', { email, code: otpCode });
@@ -100,6 +105,7 @@ export const Login: React.FC = () => {
       setError(err.message || 'Invalid or expired 2FA code. Please try again.');
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
@@ -132,6 +138,7 @@ export const Login: React.FC = () => {
     }
 
     setLoading(true);
+    showLoader('Requesting password reset OTP...');
 
     try {
       await api.post('/auth/forgot-password', { email });
@@ -142,6 +149,7 @@ export const Login: React.FC = () => {
       setError(err.message || 'Failed to request reset code. Please check your connection.');
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
@@ -184,6 +192,7 @@ export const Login: React.FC = () => {
     }
 
     setLoading(true);
+    showLoader('Resetting administrative password...');
 
     try {
       await api.post('/auth/reset-password', { email, otp: otpCode, newPassword });
@@ -198,6 +207,7 @@ export const Login: React.FC = () => {
       setError(err.message || 'Failed to reset password. Please check if the OTP is correct and try again.');
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, MessageSquare, Star, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, MessageSquare, Star, Upload, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface Testimonial {
   _id: string;
@@ -16,8 +17,11 @@ interface Testimonial {
 
 export const TestimonialManager: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formMode, setFormMode] = useState<'list' | 'add' | 'edit'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -92,6 +96,8 @@ export const TestimonialManager: React.FC = () => {
       formData.append('photo', photoFile);
     }
 
+    setIsSaving(true);
+    showLoader(formMode === 'add' ? 'Creating testimonial review...' : 'Saving testimonial changes...');
     try {
       if (formMode === 'add') {
         await api.post('/testimonials', formData, true);
@@ -104,17 +110,25 @@ export const TestimonialManager: React.FC = () => {
       fetchTestimonials();
     } catch (err: any) {
       addToast('Error saving testimonial', err.message || 'Failed to save testimonial.', 'error');
+    } finally {
+      setIsSaving(false);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this testimonial?')) return;
+    setDeletingId(id);
+    showLoader('Deleting testimonial...');
     try {
       await api.delete(`/testimonials/${id}`);
       addToast('Testimonial Deleted', 'Successfully deleted appreciation review.', 'success');
       fetchTestimonials();
     } catch (err: any) {
       addToast('Delete Failed', err.message || 'Failed to delete testimonial.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -135,7 +149,8 @@ export const TestimonialManager: React.FC = () => {
         {formMode === 'list' && (
           <button
             onClick={handleOpenAdd}
-            className="bg-brand-accent hover:bg-brand-accentHover text-white text-xs font-bold py-2.5 px-5 rounded-full flex items-center gap-1.5 shadow-md cursor-pointer"
+            disabled={!!deletingId}
+            className="bg-brand-accent hover:bg-brand-accentHover text-white text-xs font-bold py-2.5 px-5 rounded-full flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={15} />
             Add Review
@@ -189,11 +204,19 @@ export const TestimonialManager: React.FC = () => {
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-end gap-2">
-                  <button onClick={() => handleOpenEdit(t)} className="p-2 border rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer">
+                  <button 
+                    onClick={() => handleOpenEdit(t)} 
+                    disabled={!!deletingId}
+                    className="p-2 border rounded-xl text-slate-500 hover:bg-slate-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <Edit2 size={13} />
                   </button>
-                  <button onClick={() => handleDelete(t._id)} className="p-2 border border-red-100 text-red-500 hover:bg-red-50 cursor-pointer">
-                    <Trash2 size={13} />
+                  <button 
+                    onClick={() => handleDelete(t._id)} 
+                    disabled={!!deletingId}
+                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deletingId === t._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </div>
               </div>
@@ -212,17 +235,19 @@ export const TestimonialManager: React.FC = () => {
               <input
                 type="text"
                 value={name}
+                disabled={isSaving}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Sanjeev Dixit (Parent of Aarav)"
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-bold text-slate-600">Rating (1 to 5 Stars)</label>
               <select
                 value={rating}
+                disabled={isSaving}
                 onChange={(e) => setRating(Number(e.target.value))}
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               >
                 <option value={5}>5 Stars ★★★★★</option>
                 <option value={4}>4 Stars ★★★★</option>
@@ -238,8 +263,9 @@ export const TestimonialManager: React.FC = () => {
               <label className="font-bold text-slate-600">Testimonial Type</label>
               <select
                 value={type}
+                disabled={isSaving}
                 onChange={(e) => setType(e.target.value as any)}
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               >
                 <option value="Text">Written Review Text</option>
                 <option value="Video">Video Link</option>
@@ -249,8 +275,9 @@ export const TestimonialManager: React.FC = () => {
               <label className="font-bold text-slate-600">Publish Status</label>
               <select
                 value={status}
+                disabled={isSaving}
                 onChange={(e) => setStatus(e.target.value as any)}
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               >
                 <option value="Published">Published (Public)</option>
                 <option value="Draft">Draft (Invisible)</option>
@@ -264,9 +291,10 @@ export const TestimonialManager: React.FC = () => {
               <input
                 type="text"
                 value={videoUrl}
+                disabled={isSaving}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
           )}
@@ -275,20 +303,27 @@ export const TestimonialManager: React.FC = () => {
             <label className="font-bold text-slate-600">Review Comment Text *</label>
             <textarea
               value={review}
+              disabled={isSaving}
               onChange={(e) => setReview(e.target.value)}
               rows={4}
               placeholder="Enter review remarks details..."
-              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl resize-none focus:border-brand-accent text-xs"
+              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl resize-none focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <span className="font-bold text-slate-600">Author Photo</span>
             <div className="flex items-center gap-4">
-              <label className="border border-dashed py-3 px-5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold transition-all hover:bg-slate-50 text-slate-600">
+              <label className={`border border-dashed py-3 px-5 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold transition-all hover:bg-slate-50 text-slate-600 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 <Upload size={14} />
                 Select Photo
-                <input type="file" accept="image/*" onChange={(e) => e.target.files && setPhotoFile(e.target.files[0])} className="hidden" />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  disabled={isSaving}
+                  onChange={(e) => e.target.files && setPhotoFile(e.target.files[0])} 
+                  className="hidden" 
+                />
               </label>
               <div className="text-slate-400 text-[10px]">
                 {photoFile ? <span className="text-green-600 font-bold">Selected: {photoFile.name}</span> : <span>PNG, JPG allowed.</span>}
@@ -303,10 +338,20 @@ export const TestimonialManager: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 border-t pt-5 mt-3">
-            <button type="submit" className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer">
+            <button 
+              type="submit" 
+              disabled={isSaving} 
+              className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving && <Loader2 size={14} className="animate-spin" />}
               Save Testimonial
             </button>
-            <button type="button" onClick={() => setFormMode('list')} className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer">
+            <button 
+              type="button" 
+              onClick={() => setFormMode('list')} 
+              disabled={isSaving} 
+              className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Cancel
             </button>
           </div>

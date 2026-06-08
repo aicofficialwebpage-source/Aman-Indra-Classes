@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, BookOpen, Upload, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, BookOpen, Upload, Eye, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface Blog {
   _id: string;
@@ -19,7 +20,10 @@ interface Blog {
 
 export const BlogManager: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<'list' | 'add' | 'edit'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -99,6 +103,8 @@ export const BlogManager: React.FC = () => {
       formData.append('featuredImage', photoFile);
     }
 
+    setIsSaving(true);
+    showLoader(formMode === 'add' ? 'Publishing strategy post...' : 'Updating strategy post changes...');
     try {
       if (formMode === 'add') {
         await api.post('/blogs', formData, true);
@@ -111,17 +117,25 @@ export const BlogManager: React.FC = () => {
       fetchBlogs();
     } catch (err: any) {
       addToast('Error saving blog', err.message || 'Failed to save blog post.', 'error');
+    } finally {
+      setIsSaving(false);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this blog post?')) return;
+    setDeletingId(id);
+    showLoader('Deleting blog post...');
     try {
       await api.delete(`/blogs/${id}`);
       addToast('Blog Deleted', 'Successfully deleted blog post.', 'success');
       fetchBlogs();
     } catch (err: any) {
       addToast('Delete Failed', err.message || 'Failed to delete blog post.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -201,10 +215,11 @@ export const BlogManager: React.FC = () => {
                   </button>
                   <button 
                     onClick={() => handleDelete(b._id)} 
-                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 rounded-xl flex items-center justify-center cursor-pointer"
+                    disabled={deletingId !== null}
+                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 rounded-xl flex items-center justify-center cursor-pointer disabled:opacity-50"
                     title="Delete post"
                   >
-                    <Trash2 size={13} />
+                    {deletingId === b._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </div>
               </div>
@@ -325,10 +340,20 @@ export const BlogManager: React.FC = () => {
 
           {/* Buttons */}
           <div className="flex items-center gap-3 border-t pt-5 mt-3">
-            <button type="submit" className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer flex items-center gap-2 disabled:opacity-50"
+            >
+              {isSaving && <Loader2 size={14} className="animate-spin" />}
               Publish Strategy Post
             </button>
-            <button type="button" onClick={() => setFormMode('list')} className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer">
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={() => setFormMode('list')}
+              className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer disabled:opacity-50"
+            >
               Cancel
             </button>
           </div>

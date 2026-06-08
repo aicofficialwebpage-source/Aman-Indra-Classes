@@ -141,7 +141,7 @@ export const Home: React.FC = () => {
             
             {/* Tagline */}
             <div className="flex items-center justify-center lg:justify-start gap-2">
-              <span className="bg-brand-accent/15 border border-brand-accent/30 text-brand-accent dark:text-brand-accent text-[10px] md:text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full">
+              <span className="bg-brand-accent/15 border border-brand-accent/30 text-brand-accent dark:text-brand-accent text-[10px] md:text-xs font-bold uppercase tracking-wider py-1 px-5 rounded-full">
                 {settings.heroTagline || "★ Kanpur's Premier Coaching Institute"}
               </span>
             </div>
@@ -244,7 +244,7 @@ export const Home: React.FC = () => {
       {/* 3. ACHIEVERS & RESULTS SECTION */}
       <section id="achievers" className="section-padding">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3 animate-pulse">
+          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3 animate-pulse">
             Hall Of Fame
           </span>
           <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -278,7 +278,7 @@ export const Home: React.FC = () => {
       <section id="programs" className="bg-slate-50/60 dark:bg-brand-dark text-brand-dark dark:text-white border-y border-slate-100 dark:border-emerald-950/20 py-20 px-4 md:px-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
               Academic Curriculums
             </span>
             <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -381,7 +381,7 @@ export const Home: React.FC = () => {
       {/* 5. WHY AMAN INDRA CLASSES */}
       <section id="why-aic" className="section-padding">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
             Core Values
           </span>
           <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -432,7 +432,7 @@ export const Home: React.FC = () => {
       <section id="faculty" className="bg-slate-50/50 dark:bg-brand-dark text-brand-dark dark:text-white border-y border-slate-100 dark:border-emerald-950/20 py-20 px-4 md:px-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
               Mentors Group
             </span>
             <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -481,7 +481,7 @@ export const Home: React.FC = () => {
       {/* 7. CLASSROOM EXPERIENCE GALLERY */}
       <section className="section-padding">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+          <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
             Campus Media
           </span>
           <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -499,7 +499,7 @@ export const Home: React.FC = () => {
       <section className="bg-slate-50/50 dark:bg-brand-dark text-brand-dark dark:text-white border-y border-slate-100 dark:border-emerald-950/20 py-20 px-4 md:px-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
               Learning Cycle
             </span>
             <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -525,7 +525,7 @@ export const Home: React.FC = () => {
         {/* Testimonials Right */}
         <div className="lg:col-span-7 w-full flex flex-col gap-6">
           <div className="text-center lg:text-left">
-            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
               Appreciations
             </span>
             <h2 className="font-extrabold text-3xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -547,7 +547,7 @@ export const Home: React.FC = () => {
       {blogs.length > 0 && (
         <section className="section-padding">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+            <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
               Teacher Articles
             </span>
             <h2 className="font-extrabold text-3xl md:text-4xl text-brand-dark dark:text-white tracking-tight mb-4">
@@ -603,7 +603,7 @@ export const Home: React.FC = () => {
           {/* Contact Details & Google Map Left */}
           <div className="lg:col-span-5 flex flex-col gap-8">
             <div>
-              <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-4.5 rounded-full mb-3">
+              <span className="inline-block bg-brand-dark/5 dark:bg-brand-accent/15 border border-brand-dark/10 dark:border-brand-accent/30 text-brand-dark dark:text-brand-accent text-[10px] font-extrabold uppercase tracking-widest py-1 px-5 rounded-full mb-3">
                 Reach Us
               </span>
               <h2 className="font-extrabold text-3xl text-brand-dark dark:text-white tracking-tight mb-4">

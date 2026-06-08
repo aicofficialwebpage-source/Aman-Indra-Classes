@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, Filter, FileText, Download, User, 
-  MapPin, Clock, Trash2, MessageSquare 
+  Search, Filter, Trash2, FileText, 
+  Download, MessageSquare, 
+  Clock, Loader2, MapPin, User 
 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface Note {
   _id?: string;
@@ -31,7 +33,12 @@ interface Lead {
 
 export const LeadCRM: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   
@@ -80,12 +87,21 @@ export const LeadCRM: React.FC = () => {
   };
 
   const handleUpdateStatus = async (leadId: string, newStatus: string) => {
+    setUpdatingStatusId(leadId);
+    showLoader(`Updating status to "${newStatus}"...`);
     try {
       await api.put(`/leads/${leadId}`, { status: newStatus });
       addToast('Status Updated', `Lead status changed to "${newStatus}".`, 'success');
+      // If the selected lead is active, refresh its details too
+      if (selectedLead && selectedLead._id === leadId) {
+        setSelectedLead(prev => prev ? { ...prev, status: newStatus as Lead['status'] } : null);
+      }
       fetchLeads();
     } catch (err: any) {
       addToast('Error updating status', err.message || 'Failed to update status.', 'error');
+    } finally {
+      setUpdatingStatusId(null);
+      hideLoader();
     }
   };
 
@@ -93,21 +109,33 @@ export const LeadCRM: React.FC = () => {
     e.preventDefault();
     if (!selectedLead || !newNote.trim()) return;
 
+    setIsSavingNote(true);
+    showLoader('Adding follow-up note to lead record...');
     try {
-      await api.put(`/leads/${selectedLead._id}`, {
+      const data = await api.put(`/leads/${selectedLead._id}`, {
         noteText: newNote,
         noteAuthor: 'Admin Officer'
       });
       setNewNote('');
       addToast('Note Added', 'CRM follow-up note saved successfully.', 'success');
-      fetchLeads();
+      // Refresh selected lead's notes dynamically
+      if (data && data.lead) {
+        setSelectedLead(data.lead);
+      } else {
+        fetchLeads();
+      }
     } catch (err: any) {
       addToast('Error adding note', err.message || 'Failed to add CRM note.', 'error');
+    } finally {
+      setIsSavingNote(false);
+      hideLoader();
     }
   };
 
   const handleDeleteLead = async (leadId: string) => {
     if (!confirm('Are you sure you want to delete this lead from CRM database?')) return;
+    setDeletingId(leadId);
+    showLoader('Deleting lead record...');
     try {
       await api.delete(`/leads/${leadId}`);
       setSelectedLead(null);
@@ -115,6 +143,9 @@ export const LeadCRM: React.FC = () => {
       fetchLeads();
     } catch (err: any) {
       addToast('Error deleting lead', err.message || 'Failed to delete lead.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -126,11 +157,17 @@ export const LeadCRM: React.FC = () => {
     const endpoint = `/leads/export/${format}?${params.toString()}`;
     const filename = `AIC_Leads_Report_${format === 'csv' ? 'export.csv' : 'export.xlsx'}`;
     
+    setIsExporting(true);
+    showLoader(`Generating and downloading ${format.toUpperCase()} report...`);
     api.downloadBlob(endpoint, filename)
       .then(() => {
         addToast('Export Successful', `Successfully generated and downloaded ${format.toUpperCase()} report.`, 'success');
       })
-      .catch(() => addToast('Export Failed', 'Failed to generate export file.', 'error'));
+      .catch(() => addToast('Export Failed', 'Failed to generate export file.', 'error'))
+      .finally(() => {
+        setIsExporting(false);
+        hideLoader();
+      });
   };
 
   const getStatusColor = (s: string) => {
@@ -170,16 +207,18 @@ export const LeadCRM: React.FC = () => {
             <div className="flex gap-2 text-xs">
               <button 
                 onClick={() => triggerExport('xlsx')}
-                className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl border border-slate-200 flex items-center gap-1.5 cursor-pointer"
+                disabled={isExporting}
+                className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl border border-slate-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <Download size={14} />
+                {isExporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                 Excel Report
               </button>
               <button 
                 onClick={() => triggerExport('csv')}
-                className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl border border-slate-200 flex items-center gap-1.5 cursor-pointer"
+                disabled={isExporting}
+                className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl border border-slate-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <FileText size={14} />
+                {isExporting ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
                 CSV Report
               </button>
             </div>
@@ -386,7 +425,8 @@ export const LeadCRM: React.FC = () => {
               <select
                 value={selectedLead.status}
                 onChange={(e) => handleUpdateStatus(selectedLead._id, e.target.value)}
-                className="w-full border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs"
+                disabled={updatingStatusId !== null}
+                className="w-full border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs disabled:opacity-50"
               >
                 <option value="New">New</option>
                 <option value="Contacted">Contacted</option>
@@ -430,8 +470,10 @@ export const LeadCRM: React.FC = () => {
                 />
                 <button
                   type="submit"
-                  className="bg-brand-accent hover:bg-brand-accentHover text-white py-1.5 px-3 rounded-xl font-bold cursor-pointer"
+                  disabled={isSavingNote}
+                  className="bg-brand-accent hover:bg-brand-accentHover text-white py-1.5 px-3 rounded-xl font-bold cursor-pointer flex items-center gap-1 disabled:opacity-50"
                 >
+                  {isSavingNote && <Loader2 size={12} className="animate-spin" />}
                   Add
                 </button>
               </form>
@@ -441,9 +483,10 @@ export const LeadCRM: React.FC = () => {
             <div className="border-t border-slate-100 pt-4 mt-2">
               <button
                 onClick={() => handleDeleteLead(selectedLead._id)}
-                className="w-full border border-red-150 hover:bg-red-50 text-red-600 py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-colors"
+                disabled={deletingId !== null}
+                className="w-full border border-red-150 hover:bg-red-50 text-red-600 py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer text-xs transition-colors disabled:opacity-50"
               >
-                <Trash2 size={13} />
+                {deletingId === selectedLead._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                 Delete Lead Record
               </button>
             </div>

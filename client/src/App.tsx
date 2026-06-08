@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
+import { LoadingProvider } from './context/LoadingContext';
 
 // Components
 import Navbar from './components/Navbar';
@@ -90,13 +91,15 @@ export const App: React.FC = () => {
   return (
     <ThemeProvider>
       <ToastProvider>
-        <AuthProvider>
-          <SettingsProvider>
-            <BrowserRouter>
-              <MainLayout />
-            </BrowserRouter>
-          </SettingsProvider>
-        </AuthProvider>
+        <LoadingProvider>
+          <AuthProvider>
+            <SettingsProvider>
+              <BrowserRouter>
+                <MainLayout />
+              </BrowserRouter>
+            </SettingsProvider>
+          </AuthProvider>
+        </LoadingProvider>
       </ToastProvider>
     </ThemeProvider>
   );

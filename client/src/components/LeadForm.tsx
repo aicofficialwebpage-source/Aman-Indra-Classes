@@ -3,9 +3,11 @@ import confetti from 'canvas-confetti';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import { useToast } from '../context/ToastContext';
+import { useLoading } from '../context/LoadingContext';
 
 export const LeadForm: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [form, setForm] = useState({
     studentName: '',
     parentName: '',
@@ -71,6 +73,7 @@ export const LeadForm: React.FC = () => {
     }
 
     setLoading(true);
+    showLoader('Submitting your counseling inquiry...');
 
     try {
       await api.post('/leads', {
@@ -104,6 +107,7 @@ export const LeadForm: React.FC = () => {
       );
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
@@ -216,15 +220,15 @@ export const LeadForm: React.FC = () => {
               disabled={loading}
               className="border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-emerald-950/80 text-brand-dark dark:text-white focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all"
             >
-              <option value="" className="text-brand-dark bg-white dark:bg-emerald-950">Select Class</option>
-              <option value="Class 6" className="text-brand-dark bg-white dark:bg-emerald-950">Class 6th</option>
-              <option value="Class 7" className="text-brand-dark bg-white dark:bg-emerald-950">Class 7th</option>
-              <option value="Class 8" className="text-brand-dark bg-white dark:bg-emerald-950">Class 8th</option>
-              <option value="Class 9" className="text-brand-dark bg-white dark:bg-emerald-950">Class 9th</option>
-              <option value="Class 10" className="text-brand-dark bg-white dark:bg-emerald-950">Class 10th</option>
-              <option value="Class 11" className="text-brand-dark bg-white dark:bg-emerald-950">Class 11th</option>
-              <option value="Class 12" className="text-brand-dark bg-white dark:bg-emerald-950">Class 12th</option>
-              <option value="Dropper / Ex-Student" className="text-brand-dark bg-white dark:bg-emerald-950">Dropper / Target JEE-NEET</option>
+              <option value="" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Select Class</option>
+              <option value="Class 6" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 6th</option>
+              <option value="Class 7" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 7th</option>
+              <option value="Class 8" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 8th</option>
+              <option value="Class 9" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 9th</option>
+              <option value="Class 10" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 10th</option>
+              <option value="Class 11" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 11th</option>
+              <option value="Class 12" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 12th</option>
+              <option value="Dropper / Ex-Student" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Dropper / Target JEE-NEET</option>
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -237,12 +241,12 @@ export const LeadForm: React.FC = () => {
               disabled={loading}
               className="border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-emerald-950/80 text-brand-dark dark:text-white focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all"
             >
-              <option value="" className="text-brand-dark bg-white dark:bg-emerald-950">Select Program</option>
-              <option value="Foundation Program (Class 6-8)" className="text-brand-dark bg-white dark:bg-emerald-950">Foundation (Class 6-8)</option>
-              <option value="Academic Excellence (Class 9-10)" className="text-brand-dark bg-white dark:bg-emerald-950">Academic Excellence (Class 9-10)</option>
-              <option value="Board Prep (Class 11-12)" className="text-brand-dark bg-white dark:bg-emerald-950">Boards Preparation (Class 11-12)</option>
-              <option value="IIT-JEE Preparation" className="text-brand-dark bg-white dark:bg-emerald-950">IIT-JEE Prep Target</option>
-              <option value="NEET Preparation" className="text-brand-dark bg-white dark:bg-emerald-950">NEET Prep Target</option>
+              <option value="" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Select Program</option>
+              <option value="Foundation Program (Class 6-8)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Foundation (Class 6-8)</option>
+              <option value="Academic Excellence (Class 9-10)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Academic Excellence (Class 9-10)</option>
+              <option value="Board Prep (Class 11-12)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Boards Preparation (Class 11-12)</option>
+              <option value="IIT-JEE Preparation" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">IIT-JEE Prep Target</option>
+              <option value="NEET Preparation" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">NEET Prep Target</option>
             </select>
           </div>
         </div>

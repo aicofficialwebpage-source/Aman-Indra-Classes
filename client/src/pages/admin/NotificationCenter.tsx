@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Check, Trash2, Users, FileText, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react';
+import { Bell, Check, Trash2, Users, FileText, CheckCircle, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface NotificationItem {
   _id: string;
@@ -21,7 +22,11 @@ interface NotificationCenterProps {
 export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTab, onRefreshUnreadCount }) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
+  const [markingReadId, setMarkingReadId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -40,6 +45,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
   }, []);
 
   const handleMarkAllRead = async () => {
+    setIsMarkingAllRead(true);
+    showLoader('Marking all notifications read...');
     try {
       await api.put('/notifications/read-all', {});
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -47,20 +54,30 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
       onRefreshUnreadCount();
     } catch (err) {
       addToast('Error', 'Failed to update notifications.', 'error');
+    } finally {
+      setIsMarkingAllRead(false);
+      hideLoader();
     }
   };
 
   const handleMarkRead = async (id: string) => {
+    setMarkingReadId(id);
+    showLoader('Marking notification read...');
     try {
       await api.put(`/notifications/${id}`, {});
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
       onRefreshUnreadCount();
     } catch (err) {
       addToast('Error', 'Failed to mark notification as read.', 'error');
+    } finally {
+      setMarkingReadId(null);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    showLoader('Deleting notification...');
     try {
       await api.delete(`/notifications/${id}`);
       setNotifications(prev => prev.filter(n => n._id !== id));
@@ -68,6 +85,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
       onRefreshUnreadCount();
     } catch (err) {
       addToast('Error', 'Failed to delete notification.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -97,6 +117,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
+  const isActionPending = isMarkingAllRead || !!markingReadId || !!deletingId;
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in text-xs">
@@ -116,9 +137,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
         {unreadCount > 0 && (
           <button
             onClick={handleMarkAllRead}
-            className="bg-brand-accent hover:bg-brand-accentHover text-brand-dark text-xs font-bold py-2 px-4 rounded-full flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+            disabled={isActionPending}
+            className="bg-brand-accent hover:bg-brand-accentHover text-brand-dark text-xs font-bold py-2 px-4 rounded-full flex items-center gap-1 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Check size={14} />
+            {isMarkingAllRead ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             Mark all read
           </button>
         )}
@@ -169,7 +191,8 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
                     {notif.relatedId && (
                       <button
                         onClick={() => onGoToTab('crm')}
-                        className="text-brand-accent hover:underline cursor-pointer font-bold"
+                        disabled={isActionPending}
+                        className="text-brand-accent hover:underline cursor-pointer font-bold disabled:opacity-50 disabled:no-underline"
                       >
                         Open Lead in CRM &rarr;
                       </button>
@@ -182,18 +205,20 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ onGoToTa
                   {!notif.read && (
                     <button
                       onClick={() => handleMarkRead(notif._id)}
-                      className="p-2 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+                      disabled={isActionPending}
+                      className="p-2 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 rounded-xl flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Mark as read"
                     >
-                      <CheckCircle size={13} />
+                      {markingReadId === notif._id ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle size={13} />}
                     </button>
                   )}
                   <button
                     onClick={() => handleDelete(notif._id)}
-                    className="p-2 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+                    disabled={isActionPending}
+                    className="p-2 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl flex items-center justify-center transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Delete record"
                   >
-                    <Trash2 size={13} />
+                    {deletingId === notif._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </div>
               </div>

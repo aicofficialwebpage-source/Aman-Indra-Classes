@@ -3,6 +3,7 @@ import { X, CheckCircle, AlertCircle, Loader2, Sparkles, BookOpen } from 'lucide
 import confetti from 'canvas-confetti';
 import api from '../utils/api';
 import { useToast } from '../context/ToastContext';
+import { useLoading } from '../context/LoadingContext';
 
 interface ScholarshipFormProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ScholarshipFormProps {
 
 export const ScholarshipForm: React.FC<ScholarshipFormProps> = ({ isOpen, onClose }) => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [form, setForm] = useState({
     studentName: '',
     parentName: '',
@@ -53,6 +55,7 @@ export const ScholarshipForm: React.FC<ScholarshipFormProps> = ({ isOpen, onClos
     }
 
     setLoading(true);
+    showLoader('Submitting AIST scholarship registration...');
 
     try {
       await api.post('/leads', {
@@ -85,6 +88,7 @@ export const ScholarshipForm: React.FC<ScholarshipFormProps> = ({ isOpen, onClos
       );
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
@@ -187,18 +191,18 @@ export const ScholarshipForm: React.FC<ScholarshipFormProps> = ({ isOpen, onClos
                     disabled={loading}
                     className="border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-emerald-950/80 text-brand-dark dark:text-white focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all"
                   >
-                    <option value="" className="text-brand-dark bg-white dark:bg-emerald-950">Select Class</option>
-                    <option value="Class 6" className="text-brand-dark bg-white dark:bg-emerald-950">Class 6th</option>
-                    <option value="Class 7" className="text-brand-dark bg-white dark:bg-emerald-950">Class 7th</option>
-                    <option value="Class 8" className="text-brand-dark bg-white dark:bg-emerald-950">Class 8th</option>
-                    <option value="Class 9" className="text-brand-dark bg-white dark:bg-emerald-950">Class 9th</option>
-                    <option value="Class 10" className="text-brand-dark bg-white dark:bg-emerald-950">Class 10th</option>
-                    <option value="Class 11 (PCM)" className="text-brand-dark bg-white dark:bg-emerald-950">Class 11th (PCM)</option>
-                    <option value="Class 11 (PCB)" className="text-brand-dark bg-white dark:bg-emerald-950">Class 11th (PCB)</option>
-                    <option value="Class 12 (PCM)" className="text-brand-dark bg-white dark:bg-emerald-950">Class 12th (PCM)</option>
-                    <option value="Class 12 (PCB)" className="text-brand-dark bg-white dark:bg-emerald-950">Class 12th (PCB)</option>
-                    <option value="Dropper JEE" className="text-brand-dark bg-white dark:bg-emerald-950">JEE Target Batch</option>
-                    <option value="Dropper NEET" className="text-brand-dark bg-white dark:bg-emerald-950">NEET Target Batch</option>
+                    <option value="" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Select Class</option>
+                    <option value="Class 6" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 6th</option>
+                    <option value="Class 7" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 7th</option>
+                    <option value="Class 8" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 8th</option>
+                    <option value="Class 9" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 9th</option>
+                    <option value="Class 10" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 10th</option>
+                    <option value="Class 11 (PCM)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 11th (PCM)</option>
+                    <option value="Class 11 (PCB)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 11th (PCB)</option>
+                    <option value="Class 12 (PCM)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 12th (PCM)</option>
+                    <option value="Class 12 (PCB)" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Class 12th (PCB)</option>
+                    <option value="Dropper JEE" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">JEE Target Batch</option>
+                    <option value="Dropper NEET" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">NEET Target Batch</option>
                   </select>
                 </div>
 

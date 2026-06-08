@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Trophy, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, Trophy, Upload, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface Achiever {
   _id: string;
@@ -17,8 +18,11 @@ interface Achiever {
 
 export const AchieverManager: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [achievers, setAchievers] = useState<Achiever[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   // Form states
   const [formMode, setFormMode] = useState<'list' | 'add' | 'edit'>('list');
@@ -104,6 +108,8 @@ export const AchieverManager: React.FC = () => {
       formData.append('photo', photoFile);
     }
 
+    setIsSaving(true);
+    showLoader(formMode === 'add' ? 'Creating topper achiever profile...' : 'Saving topper changes...');
     try {
       if (formMode === 'add') {
         await api.post('/achievers', formData, true);
@@ -116,17 +122,25 @@ export const AchieverManager: React.FC = () => {
       fetchAchievers();
     } catch (err: any) {
       addToast('Error saving topper', err.message || 'Failed to save topper profile.', 'error');
+    } finally {
+      setIsSaving(false);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this topper achiever profile?')) return;
+    setDeletingId(id);
+    showLoader('Deleting topper profile...');
     try {
       await api.delete(`/achievers/${id}`);
       addToast('Topper Profile Deleted', 'Successfully deleted achiever profile.', 'success');
       fetchAchievers();
     } catch (err: any) {
       addToast('Delete Failed', err.message || 'Failed to delete topper.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -211,10 +225,11 @@ export const AchieverManager: React.FC = () => {
                   </button>
                   <button
                     onClick={() => handleDelete(ach._id)}
-                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 hover:text-red-750 rounded-xl flex items-center justify-center cursor-pointer transition-colors"
+                    disabled={deletingId !== null}
+                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 hover:text-red-750 rounded-xl flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50"
                     title="Delete topper profile"
                   >
-                    <Trash2 size={13} />
+                    {deletingId === ach._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </div>
               </div>
@@ -349,14 +364,17 @@ export const AchieverManager: React.FC = () => {
           <div className="flex items-center gap-3 border-t border-slate-100 pt-5 mt-3">
             <button
               type="submit"
-              className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer"
+              disabled={isSaving}
+              className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer flex items-center gap-2 disabled:opacity-50"
             >
+              {isSaving && <Loader2 size={14} className="animate-spin" />}
               Save Achiever Profile
             </button>
             <button
               type="button"
+              disabled={isSaving}
               onClick={() => setFormMode('list')}
-              className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer"
+              className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>

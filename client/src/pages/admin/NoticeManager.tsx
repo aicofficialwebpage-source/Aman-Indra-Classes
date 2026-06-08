@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Bell, Calendar } from 'lucide-react';
+import { Plus, Edit2, Trash2, Bell, Calendar, Loader2 } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
+import { useLoading } from '../../context/LoadingContext';
 
 interface Notice {
   _id: string;
@@ -14,8 +15,11 @@ interface Notice {
 
 export const NoticeManager: React.FC = () => {
   const { addToast } = useToast();
+  const { showLoader, hideLoader } = useLoading();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formMode, setFormMode] = useState<'list' | 'add' | 'edit'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -84,6 +88,8 @@ export const NoticeManager: React.FC = () => {
       scheduleDate: scheduleDate ? new Date(scheduleDate).toISOString() : new Date().toISOString()
     };
 
+    setIsSaving(true);
+    showLoader(formMode === 'add' ? 'Publishing announcement notice...' : 'Updating notice details...');
     try {
       if (formMode === 'add') {
         await api.post('/notices', payload);
@@ -96,17 +102,25 @@ export const NoticeManager: React.FC = () => {
       fetchNotices();
     } catch (err: any) {
       addToast('Error saving notice', err.message || 'Action failed.', 'error');
+    } finally {
+      setIsSaving(false);
+      hideLoader();
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this notice board announcement?')) return;
+    setDeletingId(id);
+    showLoader('Deleting notice announcement...');
     try {
       await api.delete(`/notices/${id}`);
       addToast('Notice Deleted', 'Announcement bulletin removed successfully.', 'success');
       fetchNotices();
     } catch (err: any) {
       addToast('Error deleting notice', err.message || 'Action failed.', 'error');
+    } finally {
+      setDeletingId(null);
+      hideLoader();
     }
   };
 
@@ -120,7 +134,8 @@ export const NoticeManager: React.FC = () => {
         {formMode === 'list' && (
           <button
             onClick={handleOpenAdd}
-            className="bg-brand-accent hover:bg-brand-accentHover text-white text-xs font-bold py-2.5 px-5 rounded-full flex items-center gap-1.5 shadow-md cursor-pointer"
+            disabled={!!deletingId}
+            className="bg-brand-accent hover:bg-brand-accentHover text-white text-xs font-bold py-2.5 px-5 rounded-full flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={15} />
             Post Notice
@@ -166,11 +181,19 @@ export const NoticeManager: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 mt-3 sm:mt-0 border-t sm:border-t-0 pt-3 sm:pt-0 shrink-0 self-end sm:self-center">
-                  <button onClick={() => handleOpenEdit(n)} className="p-2 border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl flex items-center justify-center cursor-pointer">
+                  <button 
+                    onClick={() => handleOpenEdit(n)} 
+                    disabled={!!deletingId}
+                    className="p-2 border border-slate-200 text-slate-500 hover:bg-slate-50 rounded-xl flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
                     <Edit2 size={13} />
                   </button>
-                  <button onClick={() => handleDelete(n._id)} className="p-2 border border-red-100 text-red-500 hover:bg-red-50 rounded-xl flex items-center justify-center cursor-pointer">
-                    <Trash2 size={13} />
+                  <button 
+                    onClick={() => handleDelete(n._id)} 
+                    disabled={!!deletingId}
+                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 rounded-xl flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deletingId === n._id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </div>
               </div>
@@ -188,9 +211,10 @@ export const NoticeManager: React.FC = () => {
             <input
               type="text"
               value={title}
+              disabled={isSaving}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. New Batch starting for JEE Mains & Advanced Droppers"
-              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs"
+              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
             />
           </div>
 
@@ -199,8 +223,9 @@ export const NoticeManager: React.FC = () => {
               <label className="font-bold text-slate-600">Notice Type *</label>
               <select
                 value={type}
+                disabled={isSaving}
                 onChange={(e) => setType(e.target.value as any)}
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl bg-white focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               >
                 <option value="Admissions Open">Admissions Open</option>
                 <option value="Scholarship Tests">Scholarship Tests (AIST)</option>
@@ -215,8 +240,9 @@ export const NoticeManager: React.FC = () => {
               <input
                 type="datetime-local"
                 value={scheduleDate}
+                disabled={isSaving}
                 onChange={(e) => setScheduleDate(e.target.value)}
-                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs"
+                className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
           </div>
@@ -225,10 +251,11 @@ export const NoticeManager: React.FC = () => {
             <label className="font-bold text-slate-600">Notice Description details</label>
             <textarea
               value={content}
+              disabled={isSaving}
               onChange={(e) => setContent(e.target.value)}
               rows={4}
               placeholder="Enter comprehensive announcement paragraphs detail. Clear syllabus lists, office counter instructions, exam duration hours..."
-              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl resize-none focus:border-brand-accent text-xs"
+              className="border border-slate-200 bg-white text-slate-800 outline-none py-2 px-3 rounded-xl resize-none focus:border-brand-accent text-xs disabled:bg-slate-50 disabled:text-slate-400"
             />
           </div>
 
@@ -237,19 +264,30 @@ export const NoticeManager: React.FC = () => {
               type="checkbox"
               id="isActiveCheck"
               checked={isActive}
+              disabled={isSaving}
               onChange={(e) => setIsActive(e.target.checked)}
-              className="w-4 h-4 text-brand-accent focus:ring-brand-accent rounded"
+              className="w-4 h-4 text-brand-accent focus:ring-brand-accent rounded disabled:opacity-50"
             />
-            <label htmlFor="isActiveCheck" className="font-bold text-slate-700 cursor-pointer">
+            <label htmlFor="isActiveCheck" className="font-bold text-slate-700 cursor-pointer disabled:opacity-50">
               Publish Live Ticker immediately (Visible on homepage notice lists)
             </label>
           </div>
 
           <div className="flex items-center gap-3 border-t pt-5 mt-3">
-            <button type="submit" className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer">
+            <button 
+              type="submit" 
+              disabled={isSaving} 
+              className="bg-brand-dark hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-xl cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving && <Loader2 size={14} className="animate-spin" />}
               Save Announcement
             </button>
-            <button type="button" onClick={() => setFormMode('list')} className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer">
+            <button 
+              type="button" 
+              onClick={() => setFormMode('list')} 
+              disabled={isSaving} 
+              className="border border-slate-200 text-slate-600 font-bold py-2.5 px-6 rounded-xl hover:bg-slate-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Cancel
             </button>
           </div>
