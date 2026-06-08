@@ -289,3 +289,87 @@ export const sendLeadStatusUpdateCustomerEmail = async (lead) => {
 
   return sendEmail({ to: lead.email, subject, text, html });
 };
+
+// 4. Admin Forgot Password Reset OTP Email
+export const sendForgotPasswordOTPEmail = async (email, otp) => {
+  const subject = `[AIC Portal] Password Reset Verification Code`;
+  const text = `
+    Hello Admin,
+    
+    You have requested to reset your password for the Aman Indra Classes (AIC) Control Panel.
+    
+    Your Password Reset Verification Code is: ${otp}
+    
+    This verification code is valid for 10 minutes. If you did not initiate this request, please change your password immediately.
+    
+    Best regards,
+    AIC Portal Mailer
+  `;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; color: #1e293b;">
+      <div style="background-color: #042F1A; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+        <h2 style="color: #FACC15; margin: 0; font-size: 20px; font-weight: 800; tracking-tight: -0.025em;">Aman Indra Classes</h2>
+        <p style="color: #f1f5f9; margin: 6px 0 0 0; font-size: 11px; font-weight: bold; tracking-widest: 0.05em; uppercase;">Security Services</p>
+      </div>
+      
+      <p style="font-size: 14px; line-height: 1.5; color: #475569;">Hello Admin,</p>
+      <p style="font-size: 14px; line-height: 1.5; color: #475569;">You have requested to reset the administrator password for your account. Please use the following One-Time Verification Code (OTP) to verify your identity and set a new password:</p>
+      
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; margin: 24px 0;">
+        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #042F1A; display: inline-block;">${otp}</span>
+      </div>
+      
+      <p style="font-size: 12px; color: #ef4444; font-weight: bold; text-align: center; margin-top: 16px;">This OTP is valid for 10 minutes. Do not share this code with anyone.</p>
+      
+      <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;">
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;">
+        If you did not initiate this request, please log in to the portal and update your security settings immediately.<br>
+        <strong>Aman Indra Classes (Kanpur)</strong>
+      </p>
+    </div>
+  `;
+
+  return sendEmail({ to: email, subject, text, html });
+};
+
+// 5. Admin Two-Factor Authentication (2FA) Code Email
+export const sendTwoFactorAuthEmail = async (email, code) => {
+  const subject = `[AIC Portal] Two-Factor Authentication (2FA) Code`;
+  const text = `
+    Hello Admin,
+    
+    Your Two-Factor Authentication (2FA) Code for login access is: ${code}
+    
+    This authorization code is valid for 5 minutes.
+    
+    Best regards,
+    AIC Portal Mailer
+  `;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; color: #1e293b;">
+      <div style="background-color: #042F1A; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+        <h2 style="color: #FACC15; margin: 0; font-size: 20px; font-weight: 800; tracking-tight: -0.025em;">Aman Indra Classes</h2>
+        <p style="color: #f1f5f9; margin: 6px 0 0 0; font-size: 11px; font-weight: bold; tracking-widest: 0.05em; uppercase;">Security Services</p>
+      </div>
+      
+      <p style="font-size: 14px; line-height: 1.5; color: #475569;">Hello Admin,</p>
+      <p style="font-size: 14px; line-height: 1.5; color: #475569;">A login attempt was initiated. Please use the following 6-digit authorization code to complete your two-step verification:</p>
+      
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; margin: 24px 0;">
+        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #f59e0b; display: inline-block;">${code}</span>
+      </div>
+      
+      <p style="font-size: 12px; color: #64748b; font-weight: bold; text-align: center; margin-top: 16px;">This authorization code is valid for 5 minutes. Do not share this code.</p>
+      
+      <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;">
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;">
+        If you did not make this request, a third party might have obtained your password. Please reset your password immediately.<br>
+        <strong>Aman Indra Classes (Kanpur)</strong>
+      </p>
+    </div>
+  `;
+
+  return sendEmail({ to: email, subject, text, html });
+};

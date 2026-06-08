@@ -14,6 +14,26 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    resetOtp: {
+      type: String,
+      default: null,
+    },
+    resetOtpExpires: {
+      type: Date,
+      default: null,
+    },
+    twoFactorOtp: {
+      type: String,
+      default: null,
+    },
+    twoFactorOtpExpires: {
+      type: Date,
+      default: null,
+    },
+    is2FAEnabled: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
