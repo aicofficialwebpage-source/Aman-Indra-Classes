@@ -4,11 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const useSMTP = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const emailjsPrivateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.FMAILJS_PRIVATE_KEY;
 const useEmailJS = !!(
   process.env.EMAILJS_SERVICE_ID &&
   process.env.EMAILJS_TEMPLATE_ID &&
   process.env.EMAILJS_PUBLIC_KEY &&
-  process.env.EMAILJS_PRIVATE_KEY
+  emailjsPrivateKey
 );
 
 let transporter = null;
@@ -44,7 +45,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
           service_id: process.env.EMAILJS_SERVICE_ID,
           template_id: process.env.EMAILJS_TEMPLATE_ID,
           user_id: process.env.EMAILJS_PUBLIC_KEY,
-          accessToken: process.env.EMAILJS_PRIVATE_KEY,
+          accessToken: emailjsPrivateKey,
           template_params: {
             to_email: to,
             subject: subject,

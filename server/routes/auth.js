@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
         await sendTwoFactorAuthEmail(admin.email, otp);
       } catch (emailErr) {
         console.error('Failed to send 2FA email:', emailErr);
-        // We log the error but still proceed so the client gets transitioned to the 2FA screen
+        return res.status(500).json({ message: `Failed to send 2FA verification email. Details: ${emailErr.message}` });
       }
 
       return res.json({
