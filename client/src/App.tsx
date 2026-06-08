@@ -17,6 +17,8 @@ import BlogList from './pages/BlogList';
 import BlogDetail from './pages/BlogDetail';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { admin, loading } = useAuth();
@@ -69,6 +71,8 @@ const MainLayout: React.FC = () => {
           <Route path="/blogs" element={<BlogList />} />
           <Route path="/blogs/:slug" element={<BlogDetail />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsConditions />} />
           <Route 
             path="/admin/*" 
             element={

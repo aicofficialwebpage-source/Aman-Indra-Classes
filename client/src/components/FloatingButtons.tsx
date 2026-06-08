@@ -5,8 +5,8 @@ import { useSettings } from '../context/SettingsContext';
 export const FloatingButtons: React.FC = () => {
   const { settings } = useSettings();
 
-  const phone = settings.contactPhone || '+91 99361 74852';
-  const whatsappNum = settings.whatsappNumber || '919936174852';
+  const phone = settings.contactPhone || '+91 91400 64194';
+  const whatsappNum = settings.whatsappNumber || '919140064194';
   const cleanPhone = phone.replace(/[^0-9+]/g, '');
 
   const whatsappUrl = `https://wa.me/${whatsappNum}?text=Hello%20Aman%20Indra%20Classes%2C%20I%20want%20to%20know%20more%20about%20your%20coaching%20programs%20and%20admissions.`;

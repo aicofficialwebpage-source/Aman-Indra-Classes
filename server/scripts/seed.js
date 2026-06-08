@@ -54,11 +54,11 @@ const seedData = async () => {
       { key: "heroTopperScore", value: "99.2%" },
       { key: "heroTopperName", value: "Shraddha Chaturvedi" },
       { key: "heroTopperText", value: "Swarup Public School Topper" },
-      { key: "contactPhone", value: "+91 99361 74852" }, // Authentic Kanpur contact
-      { key: "contactEmail", value: "admissions@amanindraclasses.com" },
+      { key: "contactPhone", value: "+91 91400 64194" }, 
+      { key: "contactEmail", value: "aicofficialwebpage@gmail.com" },
       {
         key: "contactAddress",
-        value: "123/456, Block C, Govind Nagar, Kanpur, Uttar Pradesh - 208006",
+        value: "Ratanlal Nagar Main Road, High Income Grade, Neemeshwar MahaMandir Society, Ratan Lal Nagar, Kanpur, Uttar Pradesh – 208022",
       },
       {
         key: "workingHours",
@@ -79,7 +79,7 @@ const seedData = async () => {
       {
         key: "seoMetaTitle",
         value:
-          "Aman Indra Classes (AIC) - Best Coaching in Govind Nagar, Kanpur",
+          "Aman Indra Classes (AIC) - Best Coaching in Ratan Lal Nagar, Kanpur",
       },
       {
         key: "seoMetaDescription",
@@ -91,7 +91,7 @@ const seedData = async () => {
         value:
           "Best Coaching Institute in Kanpur, IIT JEE Coaching in Kanpur, NEET Coaching in Kanpur, Class 9th 10th Coaching Kanpur, Class 11th 12th Coaching Kanpur, Foundation Coaching Kanpur",
       },
-      { key: "whatsappNumber", value: "919936174852" },
+      { key: "whatsappNumber", value: "919140064194" },
     ];
 
     console.log("Seeding Website Settings...");
@@ -257,7 +257,7 @@ const seedData = async () => {
       {
         title: "Admissions Open for Session 2026-27 (Batches starting soon)",
         content:
-          "Registration forms for Foundation (Class 6-8), Boards (11-12) and JEE/NEET are available at our Govind Nagar office or apply online.",
+          "Registration forms for Foundation (Class 6-8), Boards (11-12) and JEE/NEET are available at our Ratan Lal Nagar office or apply online.",
         type: "Admissions Open",
         isActive: true,
         scheduleDate: new Date(),

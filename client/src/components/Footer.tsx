@@ -27,9 +27,9 @@ const YoutubeIcon = () => (
 export const Footer: React.FC = () => {
   const { settings } = useSettings();
 
-  const phone = settings.contactPhone || '+91 99361 74852';
-  const email = settings.contactEmail || 'admissions@amanindraclasses.com';
-  const address = settings.contactAddress || '123/456, Block C, Govind Nagar, Kanpur, Uttar Pradesh - 208006';
+  const phone = settings.contactPhone || '+91 91400 64194';
+  const email = settings.contactEmail || 'aicofficialwebpage@gmail.com';
+  const address = settings.contactAddress || 'Ratanlal Nagar Main Road, High Income Grade, Neemeshwar MahaMandir Society, Ratan Lal Nagar, Kanpur, Uttar Pradesh – 208022';
   const hours = settings.workingHours || 'Monday - Saturday: 11:00 AM - 8:00 PM | Sunday: 9:00 AM - 1:00 PM';
   
   const cleanPhone = phone.replace(/[^0-9+]/g, '');
@@ -166,18 +166,18 @@ export const Footer: React.FC = () => {
             </li>
           </ul>
         </div>
-
       </div>
 
       {/* Copyright */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8 border-t border-emerald-950 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-        <span>© {new Date().getFullYear()} Aman Indra Classes (AIC) Govind Nagar, Kanpur. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} Aman Indra Classes (AIC) Ratan Lal Nagar, Kanpur. All rights reserved.</span>
         <div className="flex gap-6">
           <Link to="/login" className="hover:text-slate-300 transition-colors">Admin Login</Link>
-          <a href="#privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
-          <a href="#terms" className="hover:text-slate-300 transition-colors">Terms of Service</a>
+          <Link to="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
         </div>
       </div>
+
     </footer>
   );
 };

@@ -621,7 +621,7 @@ export const Home: React.FC = () => {
                 <div>
                   <strong className="text-brand-dark dark:text-white block mb-0.5 text-xs md:text-sm">Office Address</strong>
                   <span className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px] md:text-xs">
-                    {settings.contactAddress || '123/456, Block C, Govind Nagar, Kanpur, Uttar Pradesh - 208006'}
+                    {settings.contactAddress || 'Ratanlal Nagar Main Road, High Income Grade, Neemeshwar MahaMandir Society, Ratan Lal Nagar, Kanpur, Uttar Pradesh – 208022'}
                   </span>
                 </div>
               </div>
@@ -629,8 +629,8 @@ export const Home: React.FC = () => {
                 <Phone size={18} className="text-brand-accent shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-brand-dark dark:text-white block mb-0.5 text-xs md:text-sm">Contact Number</strong>
-                  <a href={`tel:${(settings.contactPhone || '+91 99361 74852').replace(/[^0-9+]/g, '')}`} className="text-slate-600 dark:text-slate-300 hover:text-brand-accent text-[11px] md:text-xs">
-                    {settings.contactPhone || '+91 99361 74852'}
+                  <a href={`tel:${(settings.contactPhone || '+91 91400 64194').replace(/[^0-9+]/g, '')}`} className="text-slate-600 dark:text-slate-300 hover:text-brand-accent text-[11px] md:text-xs">
+                    {settings.contactPhone || '+91 91400 64194'}
                   </a>
                 </div>
               </div>
@@ -638,8 +638,8 @@ export const Home: React.FC = () => {
                 <Mail size={18} className="text-brand-accent shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-brand-dark dark:text-white block mb-0.5 text-xs md:text-sm">Official Email</strong>
-                  <a href={`mailto:${settings.contactEmail || 'admissions@amanindraclasses.com'}`} className="text-slate-600 dark:text-slate-300 hover:text-brand-accent text-[11px] md:text-xs">
-                    {settings.contactEmail || 'admissions@amanindraclasses.com'}
+                  <a href={`mailto:${settings.contactEmail || 'aicofficialwebpage@gmail.com'}`} className="text-slate-600 dark:text-slate-300 hover:text-brand-accent text-[11px] md:text-xs">
+                    {settings.contactEmail || 'aicofficialwebpage@gmail.com'}
                   </a>
                 </div>
               </div>
