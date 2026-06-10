@@ -9,6 +9,7 @@ export const LeadForm: React.FC = () => {
   const { addToast } = useToast();
   const { showLoader, hideLoader } = useLoading();
   const [form, setForm] = useState({
+    purpose: 'Enquiry',
     studentName: '',
     parentName: '',
     phone: '',
@@ -21,6 +22,7 @@ export const LeadForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isFollowupSubmitted, setIsFollowupSubmitted] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -66,6 +68,11 @@ export const LeadForm: React.FC = () => {
       return;
     }
 
+    if (form.purpose === 'Follow-up' && !form.email) {
+      setError('Email address is required for follow-up requests.');
+      return;
+    }
+
     const numericPhone = form.phone.replace(/[^0-9]/g, '');
     if (numericPhone.length < 10) {
       setError('Please enter a valid 10-digit phone number.');
@@ -73,22 +80,28 @@ export const LeadForm: React.FC = () => {
     }
 
     setLoading(true);
-    showLoader('Submitting your counseling inquiry...');
+    const isFollowup = form.purpose === 'Follow-up';
+    showLoader(isFollowup ? 'Submitting your follow-up request...' : 'Submitting your counseling inquiry...');
 
     try {
+      const submittedName = form.studentName;
       await api.post('/leads', {
         ...form,
         type: 'Enquiry'
       });
+      setIsFollowupSubmitted(isFollowup);
       setSuccess(true);
       triggerConfetti();
       addToast(
-        'Enquiry Received!', 
-        `Thank you ${form.studentName}, we've sent a confirmation to your contact.`, 
+        isFollowup ? 'Follow-up Received!' : 'Enquiry Received!', 
+        isFollowup 
+          ? `Thank you ${submittedName}, your follow-up request has been registered.`
+          : `Thank you ${submittedName}, we've sent a confirmation to your contact.`, 
         'success'
       );
       // Reset form
       setForm({
+        purpose: 'Enquiry',
         studentName: '',
         parentName: '',
         phone: '',
@@ -117,9 +130,13 @@ export const LeadForm: React.FC = () => {
         <div className="w-16 h-16 bg-green-50 dark:bg-emerald-900 text-green-600 dark:text-brand-accent rounded-full flex items-center justify-center shadow-inner">
           <CheckCircle size={36} />
         </div>
-        <h3 className="font-extrabold text-2xl text-brand-dark dark:text-white">Enquiry Received!</h3>
+        <h3 className="font-extrabold text-2xl text-brand-dark dark:text-white">
+          {isFollowupSubmitted ? 'Follow-up Received!' : 'Enquiry Received!'}
+        </h3>
         <p className="text-slate-600 dark:text-slate-400 text-sm max-w-sm">
-          Thank you for reaching out to Aman Indra Classes. Our counseling coordinator will call you within 24 hours to schedule your free guidance session.
+          {isFollowupSubmitted
+            ? 'Thank you for your follow-up request. Our counseling desk has updated your existing enquiry status and will prioritize getting in touch with you shortly.'
+            : 'Thank you for reaching out to Aman Indra Classes. Our counseling coordinator will call you within 24 hours to schedule your free guidance session.'}
         </p>
         <button
           onClick={() => setSuccess(false)}
@@ -151,6 +168,21 @@ export const LeadForm: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-sm">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="purpose" className="font-bold text-xs text-brand-dark dark:text-slate-200">Purpose of Contact *</label>
+          <select
+            id="purpose"
+            name="purpose"
+            value={form.purpose}
+            onChange={handleChange}
+            disabled={loading}
+            className="border border-slate-200 dark:border-emerald-800/40 bg-white dark:bg-emerald-950/80 text-brand-dark dark:text-white focus:border-brand-accent focus:ring-1 focus:ring-brand-accent outline-none py-2.5 px-4 rounded-xl transition-all"
+          >
+            <option value="Enquiry" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">New Admission Enquiry</option>
+            <option value="Follow-up" className="text-brand-dark dark:text-white bg-white dark:bg-emerald-950">Follow-up on Existing Enquiry</option>
+          </select>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="studentName" className="font-bold text-xs text-brand-dark dark:text-slate-200">Student Name *</label>
@@ -195,7 +227,9 @@ export const LeadForm: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="font-bold text-xs text-brand-dark dark:text-slate-200">Email Address (Optional)</label>
+            <label htmlFor="email" className="font-bold text-xs text-brand-dark dark:text-slate-200">
+              Email Address {form.purpose === 'Follow-up' ? '*' : '(Optional)'}
+            </label>
             <input
               id="email"
               type="email"

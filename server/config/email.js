@@ -92,14 +92,19 @@ export const sendEmail = async ({ to, subject, html, text }) => {
 };
 
 // 1. Admin Email Notification on New Inquiry
-export const sendLeadEnquiryAdminEmail = async (lead) => {
+export const sendLeadEnquiryAdminEmail = async (lead, isFollowup = false) => {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@amanindraclasses.com';
-  const subject = `[New CRM Lead] Inquiry from ${lead.studentName} (${lead.class})`;
+  const label = isFollowup ? 'Follow-up Request' : 'Inquiry';
+  const subject = `[CRM ${label}] from ${lead.studentName} (${lead.class})`;
+  
+  const latestMessage = lead.notes && lead.notes.length > 0 && isFollowup
+    ? lead.notes[lead.notes.length - 1].text.replace(/^\[Web Follow-up\]:\s*/, '')
+    : (lead.message || 'No additional message');
   
   const text = `
     Hello Admin,
     
-    A new student enquiry has been received via the website:
+    A ${isFollowup ? 'follow-up request' : 'new student enquiry'} has been received via the website:
     - Student Name: ${lead.studentName}
     - Parent Name: ${lead.parentName}
     - Phone: ${lead.phone}
@@ -107,10 +112,10 @@ export const sendLeadEnquiryAdminEmail = async (lead) => {
     - Class/Target: ${lead.class}
     - Course: ${lead.course}
     - Current School: ${lead.schoolName || 'Not Provided'}
-    - Message: ${lead.message || 'No additional message'}
-    - Date: ${new Date(lead.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+    - Message: ${latestMessage}
+    - Date: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
     
-    Please log in to the Admin Dashboard (http://localhost:5173/admin) to manage this lead.
+    Please log in to the Admin Dashboard (https://amanindraclasses-official.vercel.app/admin) to manage this lead.
     
     Best regards,
     AIC Portal Mailer
@@ -118,8 +123,10 @@ export const sendLeadEnquiryAdminEmail = async (lead) => {
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #f0f0f0; border-radius: 12px; padding: 20px;">
-      <h2 style="color: #042F1A; border-bottom: 2px solid #FACC15; padding-bottom: 10px;">New Website Enquiry</h2>
-      <p>A new student enquiry has been received via the portal:</p>
+      <h2 style="color: #042F1A; border-bottom: 2px solid #FACC15; padding-bottom: 10px;">
+        ${isFollowup ? 'Website Follow-up Request' : 'New Website Enquiry'}
+      </h2>
+      <p>A ${isFollowup ? 'follow-up request' : 'new student enquiry'} has been received via the portal:</p>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
           <td style="padding: 8px 0; font-weight: bold; width: 150px;">Student Name:</td>
@@ -151,11 +158,11 @@ export const sendLeadEnquiryAdminEmail = async (lead) => {
         </tr>
         <tr>
           <td style="padding: 8px 0; font-weight: bold;">Message:</td>
-          <td style="padding: 8px 0; font-style: italic; color: #555;">${lead.message || 'No additional message'}</td>
+          <td style="padding: 8px 0; font-style: italic; color: #555;">${latestMessage}</td>
         </tr>
       </table>
       <div style="margin-top: 20px; text-align: center;">
-        <a href="http://localhost:5173/admin" style="background-color: #042F1A; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Open CRM Pipeline</a>
+        <a href="https://amanindraclasses-official.vercel.app/admin" style="background-color: #042F1A; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Open CRM Pipeline</a>
       </div>
       <p style="font-size: 10px; color: #aaa; margin-top: 30px; text-align: center;">Aman Indra Classes (Kanpur) Portal Automatic Notification</p>
     </div>

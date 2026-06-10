@@ -56,6 +56,11 @@ const leadSchema = new mongoose.Schema(
       enum: ['Enquiry', 'Scholarship'],
       default: 'Enquiry',
     },
+    purpose: {
+      type: String,
+      enum: ['Enquiry', 'Follow-up'],
+      default: 'Enquiry',
+    },
     notes: [noteSchema],
   },
   {

@@ -7,9 +7,9 @@ import xlsx from 'xlsx';
 
 const router = express.Router();
 
-// POST /api/leads - Create a new Lead (Public: Enquiry and Scholarship forms)
+// POST /api/leads - Create a new Lead or Submit a Follow-up (Public: Enquiry and Scholarship forms)
 router.post('/', async (req, res) => {
-  const { studentName, parentName, phone, email, class: studentClass, schoolName, course, message, type } = req.body;
+  const { studentName, parentName, phone, email, class: studentClass, schoolName, course, message, type, purpose } = req.body;
 
   if (!studentName || !parentName || !phone || !studentClass || !course) {
     return res.status(400).json({ message: 'Missing required fields: studentName, parentName, phone, class, and course.' });
@@ -22,12 +22,88 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    // Unique email check to avoid duplicate enquiries bombarding
-    if (email && email.trim() !== '') {
-      const checkEmail = email.trim().toLowerCase();
-      const existingLead = await Lead.findOne({ email: checkEmail });
+    const checkEmail = email ? email.trim().toLowerCase() : '';
+    const cleanStudentName = studentName.trim();
+
+    if (purpose === 'Follow-up') {
+      if (!checkEmail) {
+        return res.status(400).json({ message: 'Email address is required for follow-up requests.' });
+      }
+
+      // Find existing lead with same email and studentName (case-insensitive)
+      const existingLead = await Lead.findOne({
+        email: checkEmail,
+        studentName: { $regex: new RegExp(`^${cleanStudentName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') }
+      });
+
+      if (!existingLead) {
+        return res.status(404).json({ message: `No existing enquiry found for student "${studentName}" with email "${email}".` });
+      }
+
+      // Check frequency of follow-ups for this email in the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const relatedLeads = await Lead.find({ email: checkEmail });
+      let followupCount = 0;
+      for (const l of relatedLeads) {
+        const notes = l.notes || [];
+        for (const note of notes) {
+          if (note.text.startsWith('[Web Follow-up]') && new Date(note.date) >= thirtyDaysAgo) {
+            followupCount++;
+          }
+        }
+      }
+
+      if (followupCount >= 3) {
+        return res.status(400).json({ message: 'Maximum follow-up frequency of 3 times per month for this email address has been reached.' });
+      }
+
+      // Update existing lead status and add a follow-up note
+      const oldStatus = existingLead.status;
+      existingLead.status = 'Follow Up';
+      existingLead.purpose = 'Follow-up';
+      existingLead.notes.push({
+        text: `[Web Follow-up]: ${message || 'Follow-up requested via website form.'}`,
+        author: 'Web User',
+        date: new Date()
+      });
+
+      await existingLead.save();
+
+      // Log database notification for admin dashboard
+      try {
+        const notification = new Notification({
+          title: `Follow-up: ${existingLead.studentName}`,
+          message: `${existingLead.studentName} (${existingLead.class}) requested a follow-up.`,
+          type: 'status_update',
+          relatedId: existingLead._id
+        });
+        await notification.save();
+      } catch (notifErr) {
+        console.error('Failed to log follow-up notification in database:', notifErr);
+      }
+
+      // Trigger email alerts asynchronously
+      sendLeadEnquiryAdminEmail(existingLead, true).catch(err => console.error("Admin email alert failed:", err));
+      if (oldStatus !== 'Follow Up') {
+        sendLeadStatusUpdateCustomerEmail(existingLead).catch(err => console.error("Status update email failed:", err));
+      }
+
+      console.log(`FOLLOW-UP REQUEST SUBMITTED: ${existingLead.studentName} - Course: ${existingLead.course} - Phone: ${existingLead.phone}`);
+
+      return res.status(200).json({ message: 'Follow-up request submitted successfully!', lead: existingLead });
+    }
+
+    // Enquiry path (either purpose is 'Enquiry' or not set)
+    if (checkEmail) {
+      // Find if student under same email has already made an enquiry/registration
+      const existingLead = await Lead.findOne({
+        email: checkEmail,
+        studentName: { $regex: new RegExp(`^${cleanStudentName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') }
+      });
       if (existingLead) {
-        return res.status(400).json({ message: 'An enquiry with this email address has already been submitted.' });
+        return res.status(400).json({ message: `An enquiry for student "${studentName}" with this email address has already been submitted.` });
       }
     }
 
@@ -41,6 +117,7 @@ router.post('/', async (req, res) => {
       course,
       message: message || '',
       type: type || 'Enquiry',
+      purpose: purpose || 'Enquiry',
       notes: [],
     });
 
@@ -223,6 +300,7 @@ router.get('/export/xlsx', auth, async (req, res) => {
       'School': l.schoolName || 'N/A',
       'Course/Program': l.course,
       'Lead Type': l.type,
+      'Purpose of Contact': l.purpose || 'Enquiry',
       'CRM Status': l.status,
       'Message': l.message || '',
       'Notes count': l.notes.length,
@@ -280,7 +358,7 @@ router.get('/export/csv', auth, async (req, res) => {
 
     const headers = [
       'Date', 'Student Name', 'Parent Name', 'Phone', 'Email', 
-      'Class', 'School', 'Course', 'Type', 'Status', 'Message', 'Notes'
+      'Class', 'School', 'Course', 'Type', 'Purpose of Contact', 'Status', 'Message', 'Notes'
     ];
 
     const rows = leads.map(l => [
@@ -293,6 +371,7 @@ router.get('/export/csv', auth, async (req, res) => {
       l.schoolName || 'N/A',
       l.course,
       l.type,
+      l.purpose || 'Enquiry',
       l.status,
       l.message || '',
       l.notes.map(n => `[${n.author}]: ${n.text}`).join(' | ')

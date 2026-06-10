@@ -27,6 +27,7 @@ interface Lead {
   message?: string;
   status: 'New' | 'Contacted' | 'Follow Up' | 'Interested' | 'Converted' | 'Not Interested';
   type: 'Enquiry' | 'Scholarship';
+  purpose?: 'Enquiry' | 'Follow-up';
   notes: Note[];
   createdAt: string;
 }
@@ -349,11 +350,18 @@ export const LeadCRM: React.FC = () => {
                         <span className="text-[10px] text-slate-400 block">{l.course}</span>
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`text-[10px] font-bold py-0.5 px-2 rounded-md ${
-                          l.type === 'Scholarship' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                          {l.type}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`text-[10px] font-bold py-0.5 px-2 rounded-md w-max ${
+                            l.type === 'Scholarship' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {l.type}
+                          </span>
+                          <span className={`text-[9px] font-semibold py-0.5 px-1.5 rounded-md w-max ${
+                            l.purpose === 'Follow-up' ? 'bg-purple-100/70 text-purple-800' : 'bg-blue-100/70 text-blue-800'
+                          }`}>
+                            {l.purpose === 'Follow-up' ? 'Follow-up' : 'Enquiry'}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         <span className={`text-[10px] font-extrabold py-0.5 px-2.5 rounded-full border ${getStatusColor(l.status)}`}>
@@ -396,6 +404,18 @@ export const LeadCRM: React.FC = () => {
                 <span className="text-slate-500 block">Father/Mother: {selectedLead.parentName}</span>
                 <span className="text-slate-500 block mt-1">Phone: {selectedLead.phone}</span>
                 {selectedLead.email && <span className="text-slate-500 block">Email: {selectedLead.email}</span>}
+                <div className="flex gap-1.5 mt-2">
+                  <span className={`text-[9px] font-bold py-0.5 px-2 rounded-md ${
+                    selectedLead.type === 'Scholarship' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {selectedLead.type}
+                  </span>
+                  <span className={`text-[9px] font-semibold py-0.5 px-2 rounded-md ${
+                    selectedLead.purpose === 'Follow-up' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {selectedLead.purpose === 'Follow-up' ? 'Follow-up' : 'Enquiry'}
+                  </span>
+                </div>
               </div>
             </div>
 
