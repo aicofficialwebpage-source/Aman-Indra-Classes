@@ -2,7 +2,7 @@ import express from 'express';
 import Setting from '../models/Setting.js';
 import Notification from '../models/Notification.js';
 import auth from '../middleware/auth.js';
-import { upload, useCloudinary } from '../middleware/upload.js';
+import { upload, useCloudinary, securityUploadMiddleware } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -17,7 +17,8 @@ router.get('/', async (req, res) => {
     }, {});
     res.json(settingsMap);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving settings.', error: error.message });
+    console.error('Error retrieving settings:', error);
+    res.status(500).json({ message: 'Error retrieving settings.' });
   }
 });
 
@@ -40,6 +41,8 @@ router.put('/', auth, async (req, res) => {
 
     await Promise.all(operations);
 
+    console.log(`[Audit Log] Admin updated global settings: ${Object.keys(updates).join(', ')}`);
+
     // Create notification entry in database
     try {
       const notification = new Notification({
@@ -61,20 +64,25 @@ router.put('/', auth, async (req, res) => {
 
     res.json({ message: 'Settings updated successfully.', settings: freshSettingsMap });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating settings.', error: error.message });
+    console.error('Error updating settings:', error);
+    res.status(500).json({ message: 'Error updating settings.' });
   }
 });
 
 // POST /api/settings/upload - Upload settings-related image (Protected)
-router.post('/upload', auth, upload.single('image'), async (req, res) => {
+router.post('/upload', auth, upload.single('image'), securityUploadMiddleware, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No image file uploaded.' });
     }
     const url = useCloudinary ? req.file.path : `/uploads/${req.file.filename}`;
+    
+    console.log(`[Audit Log] Admin uploaded settings media: ${url}`);
+
     res.json({ url });
   } catch (error) {
-    res.status(500).json({ message: 'Error uploading image.', error: error.message });
+    console.error('Error uploading settings image:', error);
+    res.status(500).json({ message: 'Error uploading image.' });
   }
 });
 

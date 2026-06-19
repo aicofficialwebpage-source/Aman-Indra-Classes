@@ -2,7 +2,7 @@ import express from 'express';
 import Gallery from '../models/Gallery.js';
 import Notification from '../models/Notification.js';
 import auth from '../middleware/auth.js';
-import { upload, useCloudinary, cloudinary } from '../middleware/upload.js';
+import { upload, useCloudinary, cloudinary, securityUploadMiddleware } from '../middleware/upload.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -20,12 +20,13 @@ router.get('/', async (req, res) => {
     const images = await Gallery.find(query).sort('-createdAt');
     res.json(images);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving gallery images.', error: error.message });
+    console.error('Error retrieving gallery images:', error);
+    res.status(500).json({ message: 'Error retrieving gallery images.' });
   }
 });
 
 // POST /api/gallery - Bulk upload gallery images (Protected, accepts array of 'images')
-router.post('/', auth, upload.array('images', 10), async (req, res) => {
+router.post('/', auth, upload.array('images', 10), securityUploadMiddleware, async (req, res) => {
   const { category } = req.body;
 
   if (!category) {
@@ -53,6 +54,8 @@ router.post('/', auth, upload.array('images', 10), async (req, res) => {
       savedImages.push(galleryItem);
     }
 
+    console.log(`[Audit Log] Admin uploaded ${savedImages.length} gallery images to category: ${category}`);
+
     try {
       const notification = new Notification({
         title: 'Gallery Media Uploaded',
@@ -69,7 +72,8 @@ router.post('/', auth, upload.array('images', 10), async (req, res) => {
       images: savedImages
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error uploading gallery images.', error: error.message });
+    console.error('Error uploading gallery images:', error);
+    res.status(500).json({ message: 'Error uploading gallery images.' });
   }
 });
 
@@ -98,6 +102,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     await Gallery.findByIdAndDelete(req.params.id);
 
+    console.log(`[Audit Log] Admin deleted gallery image: ${item._id} from category: ${item.category}`);
+
     try {
       const notification = new Notification({
         title: 'Gallery Media Deleted',
@@ -111,7 +117,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({ message: 'Gallery image deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting gallery image.', error: error.message });
+    console.error('Error deleting gallery image:', error);
+    res.status(500).json({ message: 'Error deleting gallery image.' });
   }
 });
 

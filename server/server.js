@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
 import connectDB from './config/db.js';
 
 // Route imports
@@ -29,13 +30,21 @@ import auth from './middleware/auth.js';
 
 dotenv.config();
 
+// Validate critical environment variables at boot
+const requiredEnvVars = ['JWT_SECRET', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'MONGODB_URI'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+if (missingEnvVars.length > 0) {
+  console.error(`[FATAL ERROR] Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  process.exit(1);
+}
+
 // Connect to Database & Auto-Seed Default Admin
 connectDB().then(async () => {
   try {
     const adminCount = await Admin.countDocuments({});
     if (adminCount === 0) {
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@amanindraclasses.com';
-      const adminPassword = process.env.ADMIN_PASSWORD || 'AdminAIC2014!';
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
       
       console.log(`Auto-Seed: Database is empty. Seeding default admin user: ${adminEmail}`);
       const defaultAdmin = new Admin({
@@ -54,12 +63,33 @@ connectDB().then(async () => {
 
 const app = express();
 
-// Middlewares
+// Apply standard Helmet security headers
+app.use(helmet());
+
+// Whitelist-based CORS configuration
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(o => o.length > 0);
+
+// Always allow the production Vercel frontend by default
+if (allowedOrigins.length === 0) {
+  allowedOrigins.push('https://amanindraclasses-official.vercel.app');
+}
+
 app.use(cors({
-  origin: '*', // Allow all origins for dev/sandbox ease
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, postman, curl) or if in whitelist
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -103,7 +133,8 @@ app.get('/api/dashboard/stats', auth, async (req, res) => {
       totalGallery,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error loading dashboard statistics.', error: error.message });
+    console.error('Error loading dashboard statistics:', error);
+    res.status(500).json({ message: 'Error loading dashboard statistics.' });
   }
 });
 
@@ -114,8 +145,8 @@ app.get('/', (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'An internal server error occurred.', error: err.message });
+  console.error('[Global Error Handler]:', err.stack || err);
+  res.status(500).json({ message: 'An internal server error occurred.' });
 });
 
 // Listen

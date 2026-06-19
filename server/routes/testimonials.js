@@ -2,7 +2,7 @@ import express from 'express';
 import Testimonial from '../models/Testimonial.js';
 import Notification from '../models/Notification.js';
 import auth from '../middleware/auth.js';
-import { upload, useCloudinary } from '../middleware/upload.js';
+import { upload, useCloudinary, securityUploadMiddleware } from '../middleware/upload.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -14,7 +14,8 @@ router.get('/', async (req, res) => {
     const testimonials = await Testimonial.find({ status: 'Published' }).sort('-createdAt');
     res.json(testimonials);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving testimonials.', error: error.message });
+    console.error('Error retrieving testimonials:', error);
+    res.status(500).json({ message: 'Error retrieving testimonials.' });
   }
 });
 
@@ -24,12 +25,13 @@ router.get('/all', auth, async (req, res) => {
     const testimonials = await Testimonial.find({}).sort('-createdAt');
     res.json(testimonials);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving testimonials.', error: error.message });
+    console.error('Error retrieving all testimonials:', error);
+    res.status(500).json({ message: 'Error retrieving testimonials.' });
   }
 });
 
 // POST /api/testimonials - Create Testimonial (Protected, handles optional file upload)
-router.post('/', auth, upload.single('photo'), async (req, res) => {
+router.post('/', auth, upload.single('photo'), securityUploadMiddleware, async (req, res) => {
   const { name, review, rating, type, videoUrl, status } = req.body;
 
   if (!name || !review) {
@@ -54,6 +56,8 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 
     await testimonial.save();
 
+    console.log(`[Audit Log] Admin added student/parent testimonial review from: ${name}`);
+
     try {
       const notification = new Notification({
         title: 'New Testimonial Added',
@@ -67,12 +71,13 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 
     res.status(201).json({ message: 'Testimonial created successfully.', testimonial });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating testimonial.', error: error.message });
+    console.error('Error creating testimonial:', error);
+    res.status(500).json({ message: 'Error creating testimonial.' });
   }
 });
 
 // PUT /api/testimonials/:id - Update Testimonial (Protected, handles optional file upload)
-router.put('/:id', auth, upload.single('photo'), async (req, res) => {
+router.put('/:id', auth, upload.single('photo'), securityUploadMiddleware, async (req, res) => {
   const { name, review, rating, type, videoUrl, status } = req.body;
 
   try {
@@ -100,6 +105,8 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
 
     await testimonial.save();
 
+    console.log(`[Audit Log] Admin updated testimonial review from: ${testimonial.name}`);
+
     try {
       const notification = new Notification({
         title: 'Testimonial Updated',
@@ -113,7 +120,8 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
 
     res.json({ message: 'Testimonial updated successfully.', testimonial });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating testimonial.', error: error.message });
+    console.error('Error updating testimonial:', error);
+    res.status(500).json({ message: 'Error updating testimonial.' });
   }
 });
 
@@ -134,6 +142,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     await Testimonial.findByIdAndDelete(req.params.id);
 
+    console.log(`[Audit Log] Admin deleted testimonial review from: ${testimonial.name}`);
+
     try {
       const notification = new Notification({
         title: 'Testimonial Deleted',
@@ -147,7 +157,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({ message: 'Testimonial deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting testimonial.', error: error.message });
+    console.error('Error deleting testimonial:', error);
+    res.status(500).json({ message: 'Error deleting testimonial.' });
   }
 });
 

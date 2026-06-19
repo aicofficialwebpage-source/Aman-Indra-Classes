@@ -12,7 +12,7 @@ const auth = (req, res, next) => {
       return res.status(401).json({ message: 'Token parsing failed, access denied.' });
     }
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'super_secret_aic_jwt_token_key_102938');
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
     if (!verified) {
       return res.status(401).json({ message: 'Token verification failed, access denied.' });
     }
@@ -20,7 +20,8 @@ const auth = (req, res, next) => {
     req.admin = verified;
     next();
   } catch (err) {
-    res.status(401).json({ message: 'Invalid token, access denied.', error: err.message });
+    console.error('JWT authentication error:', err.message);
+    res.status(401).json({ message: 'Invalid token, access denied.' });
   }
 };
 

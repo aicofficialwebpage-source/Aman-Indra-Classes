@@ -2,7 +2,7 @@ import express from 'express';
 import Blog from '../models/Blog.js';
 import Notification from '../models/Notification.js';
 import auth from '../middleware/auth.js';
-import { upload, useCloudinary } from '../middleware/upload.js';
+import { upload, useCloudinary, securityUploadMiddleware } from '../middleware/upload.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -27,7 +27,8 @@ router.get('/', async (req, res) => {
     const blogs = await Blog.find({}).sort('-createdAt');
     res.json(blogs);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving blogs.', error: error.message });
+    console.error('Error retrieving blogs:', error);
+    res.status(500).json({ message: 'Error retrieving blogs.' });
   }
 });
 
@@ -40,12 +41,13 @@ router.get('/:slug', async (req, res) => {
     }
     res.json(blog);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving blog article.', error: error.message });
+    console.error('Error retrieving blog article:', error);
+    res.status(500).json({ message: 'Error retrieving blog article.' });
   }
 });
 
 // POST /api/blogs - Create new Blog post (Protected, handles featured image)
-router.post('/', auth, upload.single('featuredImage'), async (req, res) => {
+router.post('/', auth, upload.single('featuredImage'), securityUploadMiddleware, async (req, res) => {
   const { title, excerpt, content, metaTitle, metaDescription, metaKeywords, author } = req.body;
 
   if (!title || !content) {
@@ -80,6 +82,8 @@ router.post('/', auth, upload.single('featuredImage'), async (req, res) => {
 
     await blog.save();
 
+    console.log(`[Audit Log] Admin blog post published: "${title}"`);
+
     try {
       const notification = new Notification({
         title: 'New Blog Published',
@@ -93,12 +97,13 @@ router.post('/', auth, upload.single('featuredImage'), async (req, res) => {
 
     res.status(201).json({ message: 'Blog post published successfully.', blog });
   } catch (error) {
-    res.status(500).json({ message: 'Error publishing blog post.', error: error.message });
+    console.error('Error publishing blog post:', error);
+    res.status(500).json({ message: 'Error publishing blog post.' });
   }
 });
 
 // PUT /api/blogs/:id - Update Blog post (Protected, handles optional image)
-router.put('/:id', auth, upload.single('featuredImage'), async (req, res) => {
+router.put('/:id', auth, upload.single('featuredImage'), securityUploadMiddleware, async (req, res) => {
   const { title, excerpt, content, metaTitle, metaDescription, metaKeywords, author, slug } = req.body;
 
   try {
@@ -138,6 +143,8 @@ router.put('/:id', auth, upload.single('featuredImage'), async (req, res) => {
 
     await blog.save();
 
+    console.log(`[Audit Log] Admin blog post updated: "${blog.title}"`);
+
     try {
       const notification = new Notification({
         title: 'Blog Post Updated',
@@ -151,7 +158,8 @@ router.put('/:id', auth, upload.single('featuredImage'), async (req, res) => {
 
     res.json({ message: 'Blog post updated successfully.', blog });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating blog post.', error: error.message });
+    console.error('Error updating blog post:', error);
+    res.status(500).json({ message: 'Error updating blog post.' });
   }
 });
 
@@ -172,6 +180,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     await Blog.findByIdAndDelete(req.params.id);
 
+    console.log(`[Audit Log] Admin blog post deleted: "${blog.title}"`);
+
     try {
       const notification = new Notification({
         title: 'Blog Post Deleted',
@@ -185,7 +195,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({ message: 'Blog post deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting blog post.', error: error.message });
+    console.error('Error deleting blog post:', error);
+    res.status(500).json({ message: 'Error deleting blog post.' });
   }
 });
 

@@ -16,7 +16,8 @@ router.get('/', async (req, res) => {
     }).sort('-scheduleDate -createdAt');
     res.json(notices);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving active notices.', error: error.message });
+    console.error('Error retrieving active notices:', error);
+    res.status(500).json({ message: 'Error retrieving active notices.' });
   }
 });
 
@@ -26,7 +27,8 @@ router.get('/all', auth, async (req, res) => {
     const notices = await Notice.find({}).sort('-scheduleDate -createdAt');
     res.json(notices);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving all notices.', error: error.message });
+    console.error('Error retrieving all notices:', error);
+    res.status(500).json({ message: 'Error retrieving all notices.' });
   }
 });
 
@@ -49,6 +51,8 @@ router.post('/', auth, async (req, res) => {
 
     await notice.save();
 
+    console.log(`[Audit Log] Admin announcement bulletin posted: "${title}"`);
+
     try {
       const notification = new Notification({
         title: 'Announcement Posted',
@@ -62,7 +66,8 @@ router.post('/', auth, async (req, res) => {
 
     res.status(201).json({ message: 'Notice board entry created successfully.', notice });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating notice.', error: error.message });
+    console.error('Error creating notice:', error);
+    res.status(500).json({ message: 'Error creating notice.' });
   }
 });
 
@@ -84,6 +89,8 @@ router.put('/:id', auth, async (req, res) => {
 
     await notice.save();
 
+    console.log(`[Audit Log] Admin announcement bulletin updated: "${notice.title}"`);
+
     try {
       const notification = new Notification({
         title: 'Announcement Updated',
@@ -97,7 +104,8 @@ router.put('/:id', auth, async (req, res) => {
 
     res.json({ message: 'Notice updated successfully.', notice });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating notice.', error: error.message });
+    console.error('Error updating notice:', error);
+    res.status(500).json({ message: 'Error updating notice.' });
   }
 });
 
@@ -110,6 +118,8 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     await Notice.findByIdAndDelete(req.params.id);
+
+    console.log(`[Audit Log] Admin announcement bulletin deleted: "${notice.title}"`);
 
     try {
       const notification = new Notification({
@@ -124,7 +134,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({ message: 'Notice deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting notice.', error: error.message });
+    console.error('Error deleting notice:', error);
+    res.status(500).json({ message: 'Error deleting notice.' });
   }
 });
 

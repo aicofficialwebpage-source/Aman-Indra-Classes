@@ -2,7 +2,7 @@ import express from 'express';
 import Faculty from '../models/Faculty.js';
 import Notification from '../models/Notification.js';
 import auth from '../middleware/auth.js';
-import { upload, useCloudinary } from '../middleware/upload.js';
+import { upload, useCloudinary, securityUploadMiddleware } from '../middleware/upload.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -14,12 +14,13 @@ router.get('/', async (req, res) => {
     const faculty = await Faculty.find({}).sort('orderIndex createdAt');
     res.json(faculty);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving faculty profiles.', error: error.message });
+    console.error('Error retrieving faculty profiles:', error);
+    res.status(500).json({ message: 'Error retrieving faculty profiles.' });
   }
 });
 
 // POST /api/faculty - Create new Faculty Profile (Protected, handles file upload)
-router.post('/', auth, upload.single('photo'), async (req, res) => {
+router.post('/', auth, upload.single('photo'), securityUploadMiddleware, async (req, res) => {
   const { name, subject, qualification, experience, bio, orderIndex } = req.body;
 
   if (!name || !subject || !qualification || !experience) {
@@ -44,6 +45,8 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 
     await faculty.save();
 
+    console.log(`[Audit Log] Admin faculty profile created for: ${name}`);
+
     try {
       const notification = new Notification({
         title: 'New Teacher Added',
@@ -57,12 +60,13 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 
     res.status(201).json({ message: 'Faculty profile created successfully.', faculty });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating faculty profile.', error: error.message });
+    console.error('Error creating faculty profile:', error);
+    res.status(500).json({ message: 'Error creating faculty profile.' });
   }
 });
 
 // PUT /api/faculty/:id - Update Faculty details (Protected, handles optional upload)
-router.put('/:id', auth, upload.single('photo'), async (req, res) => {
+router.put('/:id', auth, upload.single('photo'), securityUploadMiddleware, async (req, res) => {
   const { name, subject, qualification, experience, bio, orderIndex } = req.body;
 
   try {
@@ -90,6 +94,8 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
 
     await faculty.save();
 
+    console.log(`[Audit Log] Admin faculty profile updated for: ${faculty.name}`);
+
     try {
       const notification = new Notification({
         title: 'Teacher Profile Updated',
@@ -103,7 +109,8 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
 
     res.json({ message: 'Faculty profile updated successfully.', faculty });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating faculty profile.', error: error.message });
+    console.error('Error updating faculty profile:', error);
+    res.status(500).json({ message: 'Error updating faculty profile.' });
   }
 });
 
@@ -124,6 +131,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     await Faculty.findByIdAndDelete(req.params.id);
 
+    console.log(`[Audit Log] Admin faculty profile deleted: ${faculty.name}`);
+
     try {
       const notification = new Notification({
         title: 'Teacher Profile Deleted',
@@ -137,7 +146,8 @@ router.delete('/:id', auth, async (req, res) => {
 
     res.json({ message: 'Faculty profile deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting faculty profile.', error: error.message });
+    console.error('Error deleting faculty profile:', error);
+    res.status(500).json({ message: 'Error deleting faculty profile.' });
   }
 });
 
